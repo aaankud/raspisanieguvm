@@ -262,11 +262,9 @@
                     <div class="mt-3 text-center">
                         <h3 id="scheduleModalTitle" class="text-lg leading-6 font-medium text-gray-900">Добавить занятие</h3>
                         <div class="mt-2 px-7 py-3 space-y-4">
-                            <!-- NEW: Added type selection -->
                             <select id="scheduleTypeInput" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
                                 <option value="class">Занятие</option>
-                                <option value="smallBreak">Малый перерыв</option>
-                                <option value="largeBreak">Большой перерыв</option>
+                                <option value="break">Перерыв</option>
                             </select>
                             
                             <select id="scheduleDayInput" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
@@ -280,11 +278,16 @@
                             </select>
                             <input id="scheduleTimeInput" type="time" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
                             
-                            <!-- Fields that will be conditionally hidden for breaks -->
+                            <!-- Fields for class -->
                             <div id="classFields">
                                 <input id="scheduleSubjectInput" type="text" placeholder="Название предмета" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
                                 <input id="scheduleBuildingInput" type="text" placeholder="Корпус" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
                                 <input id="scheduleRoomInput" type="text" placeholder="Кабинет" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- NEW: Field for break duration -->
+                            <div id="breakFields" class="hidden">
+                                <input id="scheduleDurationInput" type="number" placeholder="Длительность перерыва (в мин.)" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
                             </div>
 
                             <select id="scheduleWeekTypeInput" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
@@ -328,14 +331,14 @@
             { id: 104, name: 'Группа-2', facultyId: null }
         ];
 
-        // Пример данных расписания с добавлением типа недели, корпуса, кабинета и типа записи
+        // Пример данных расписания с добавлением типа недели, корпуса, кабинета, типа записи и длительности
         let schedule = [
-            { id: 1, day: 'Понедельник', time: '09:00', type: 'class', subject: 'Математика', group: 'Группа-1', building: 'Корпус А', room: '101', weekType: 'all' },
-            { id: 2, day: 'Понедельник', time: '10:30', type: 'smallBreak', subject: null, group: 'Группа-1', building: null, room: null, weekType: 'all' },
-            { id: 3, day: 'Понедельник', time: '11:00', type: 'class', subject: 'Физика', group: 'Группа-2', building: 'Корпус B', room: '205', weekType: 'all' },
-            { id: 4, day: 'Понедельник', time: '12:30', type: 'largeBreak', subject: null, group: 'Группа-2', building: null, room: null, weekType: 'all' },
-            { id: 5, day: 'Вторник', time: '10:00', type: 'class', subject: 'Экономическая теория', group: 'Группа-1', building: 'Корпус C', room: '315', weekType: 'even' },
-            { id: 6, day: 'Среда', time: '13:00', type: 'class', subject: 'Основы программирования', group: 'Группа-1', building: 'Корпус A', room: '108', weekType: 'all' },
+            { id: 1, day: 'Понедельник', time: '09:00', type: 'class', subject: 'Математика', group: 'Группа-1', building: 'Корпус А', room: '101', weekType: 'all', duration: null },
+            { id: 2, day: 'Понедельник', time: '10:30', type: 'break', subject: null, group: 'Группа-1', building: null, room: null, weekType: 'all', duration: 15 },
+            { id: 3, day: 'Понедельник', time: '11:00', type: 'class', subject: 'Физика', group: 'Группа-2', building: 'Корпус B', room: '205', weekType: 'all', duration: null },
+            { id: 4, day: 'Понедельник', time: '12:30', type: 'break', subject: null, group: 'Группа-2', building: null, room: null, weekType: 'all', duration: 45 },
+            { id: 5, day: 'Вторник', time: '10:00', type: 'class', subject: 'Экономическая теория', group: 'Группа-1', building: 'Корпус C', room: '315', weekType: 'even', duration: null },
+            { id: 6, day: 'Среда', time: '13:00', type: 'class', subject: 'Основы программирования', group: 'Группа-1', building: 'Корпус A', room: '108', weekType: 'all', duration: null },
         ];
 
         let currentFacultyId = null;
@@ -377,10 +380,12 @@
         const scheduleTypeInput = document.getElementById('scheduleTypeInput');
         const scheduleDayInput = document.getElementById('scheduleDayInput');
         const scheduleTimeInput = document.getElementById('scheduleTimeInput');
-        const classFields = document.getElementById('classFields'); // NEW: Container for class-specific fields
+        const classFields = document.getElementById('classFields');
+        const breakFields = document.getElementById('breakFields'); // NEW: Container for break-specific fields
         const scheduleSubjectInput = document.getElementById('scheduleSubjectInput');
         const scheduleBuildingInput = document.getElementById('scheduleBuildingInput');
         const scheduleRoomInput = document.getElementById('scheduleRoomInput');
+        const scheduleDurationInput = document.getElementById('scheduleDurationInput'); // NEW: Break duration input
         const scheduleWeekTypeInput = document.getElementById('scheduleWeekTypeInput');
         const saveScheduleEntryButton = document.getElementById('saveScheduleEntryButton');
         const closeScheduleModalButton = document.getElementById('closeScheduleModalButton');
@@ -672,7 +677,7 @@
 
                 const scheduleItem = document.createElement('div');
                 
-                // NEW: Logic to render classes vs breaks
+                // Logic to render classes vs breaks
                 if (item.type === 'class') {
                     const location = (item.building && item.room) ? `${item.building}, ${item.room}` : 'Место не указано';
                     let weekBadgeClass = '';
@@ -699,14 +704,14 @@
                         </div>
                     `;
                 } else { // It's a break
-                    const breakText = item.type === 'smallBreak' ? 'Малый перерыв' : 'Большой перерыв';
+                    const durationText = item.duration ? `(${item.duration} мин.)` : '';
                     scheduleItem.className = 'bg-purple-100 p-4 rounded-xl shadow-sm flex items-center justify-between';
                     scheduleItem.innerHTML = `
                         <div>
                             <div class="flex items-center space-x-2 mb-1">
-                                <p class="font-bold text-lg text-purple-800">${breakText}</p>
+                                <p class="font-bold text-lg text-purple-800">Перерыв</p>
                             </div>
-                            <p class="text-sm text-purple-600">${item.time}</p>
+                            <p class="text-sm text-purple-600">${item.time} ${durationText}</p>
                         </div>
                         <span class="break-badge">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block -mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -792,15 +797,15 @@
                         </div>
                     `;
                 } else { // It's a break
-                    const breakText = item.type === 'smallBreak' ? 'Малый перерыв' : 'Большой перерыв';
+                    const durationText = item.duration ? `(${item.duration} мин.)` : '';
                     scheduleItem.className = 'bg-purple-100 p-4 rounded-xl shadow-sm flex items-center justify-between';
                     contentHTML = `
                         <div>
                             <div class="flex items-center space-x-2 mb-1">
-                                <p class="font-bold text-lg text-purple-800">${breakText}</p>
+                                <p class="font-bold text-lg text-purple-800">Перерыв</p>
                                 <span class="week-badge ${weekBadgeClass}">${weekBadgeText}</span>
                             </div>
-                            <p class="text-sm text-purple-600">${item.time}</p>
+                            <p class="text-sm text-purple-600">${item.time} ${durationText}</p>
                         </div>
                     `;
                 }
@@ -919,7 +924,9 @@
             scheduleBuildingInput.value = '';
             scheduleRoomInput.value = '';
             scheduleWeekTypeInput.value = 'all';
-            classFields.classList.remove('hidden'); // Show fields for new class
+            scheduleDurationInput.value = '';
+            classFields.classList.remove('hidden'); // Show fields for class
+            breakFields.classList.add('hidden'); // Hide fields for break
             scheduleModal.classList.remove('hidden');
         });
         
@@ -939,6 +946,7 @@
             let subject = null;
             let building = null;
             let room = null;
+            let duration = null;
 
             if (type === 'class') {
                 subject = scheduleSubjectInput.value.trim();
@@ -948,6 +956,12 @@
                     showMessage('Пожалуйста, заполните название предмета.', 'error');
                     return;
                 }
+            } else if (type === 'break') {
+                 duration = parseInt(scheduleDurationInput.value);
+                 if (isNaN(duration) || duration <= 0) {
+                     showMessage('Пожалуйста, укажите корректную длительность перерыва.', 'error');
+                     return;
+                 }
             }
 
 
@@ -960,12 +974,13 @@
                     entry.subject = subject;
                     entry.building = building;
                     entry.room = room;
+                    entry.duration = duration;
                     entry.weekType = weekType;
                     showMessage('Запись успешно обновлена!', 'success');
                 }
             } else {
                 const newId = schedule.length > 0 ? Math.max(...schedule.map(e => e.id)) + 1 : 1;
-                schedule.push({ id: newId, type: type, day: day, time: time, subject: subject, group: selectedGroup.name, building: building, room: room, weekType: weekType });
+                schedule.push({ id: newId, type: type, day: day, time: time, subject: subject, group: selectedGroup.name, building: building, room: room, weekType: weekType, duration: duration });
                 showMessage('Запись успешно добавлена!', 'success');
             }
 
@@ -997,8 +1012,11 @@
                          scheduleBuildingInput.value = entry.building || '';
                          scheduleRoomInput.value = entry.room || '';
                          classFields.classList.remove('hidden');
+                         breakFields.classList.add('hidden');
                     } else {
+                        scheduleDurationInput.value = entry.duration || '';
                         classFields.classList.add('hidden');
+                        breakFields.classList.remove('hidden');
                     }
 
                     scheduleModal.classList.remove('hidden');
@@ -1016,13 +1034,15 @@
             }
         });
         
-        // NEW: Event listener for type change to hide/show class-specific fields
+        // NEW: Event listener for type change to hide/show class-specific and break-specific fields
         scheduleTypeInput.addEventListener('change', (e) => {
             const type = e.target.value;
             if (type === 'class') {
                 classFields.classList.remove('hidden');
+                breakFields.classList.add('hidden');
             } else {
                 classFields.classList.add('hidden');
+                breakFields.classList.remove('hidden');
             }
         });
 
