@@ -265,7 +265,14 @@
     <script type="module">
         // Глобальные переменные, предоставляемые средой Canvas
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const firebaseConfig = {
+          apiKey: "AIzaSyB2kuT1fSPp4kBKeEad_rYXMqh27z2KDO0",
+          authDomain: "raspisanie-c90b6.firebaseapp.com",
+          projectId: "raspisanie-c90b6",
+          storageBucket: "raspisanie-c90b6.firebasestorage.app",
+          messagingSenderId: "867699750609",
+          appId: "1:867699750609:web:6cbf1c0c8bfa429b0337f0"
+        };
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
         // --- FIREBASE ИМПОРТЫ ---
@@ -348,8 +355,8 @@
          */
         async function initializeAppAndAuth() {
             try {
-                if (Object.keys(firebaseConfig).length === 0) {
-                    throw new Error("Firebase config is missing.");
+                if (!firebaseConfig.apiKey) {
+                    throw new Error("Отсутствует конфигурация Firebase. Пожалуйста, убедитесь, что переменные среды настроены правильно.");
                 }
 
                 const app = initializeApp(firebaseConfig);
@@ -1131,6 +1138,27 @@
             }
         }
 
+        // Фильтрация расписания для пользователя
+        facultyFilter.addEventListener('change', () => {
+            const selectedFacultyId = facultyFilter.value;
+            const groupsToDisplay = selectedFacultyId
+                ? groups.filter(g => g.facultyId === selectedFacultyId)
+                : groups;
+
+            groupFilter.innerHTML = '<option value="">Выберите группу</option>';
+            groupsToDisplay.forEach(g => {
+                const option = document.createElement('option');
+                option.value = g.id;
+                option.textContent = g.name;
+                groupFilter.appendChild(option);
+            });
+            renderSchedule();
+        });
+
+        groupFilter.addEventListener('change', renderSchedule);
+        dayFilter.addEventListener('change', renderSchedule);
+        weekTypeFilter.addEventListener('change', renderSchedule);
+        
         // Запуск приложения
         initializeAppAndAuth();
         
