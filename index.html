@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление Факультетами и Группами</title>
+    <title>Расписание</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -264,17 +264,10 @@
 
     <script type="module">
         // Глобальные переменные, предоставляемые средой Canvas
-        const firebaseConfig = {
-            apiKey: "AIzaSyB2kuT1fSPp4kBKeEad_rYXMqh27z2KDO0",
-            authDomain: "raspisanie-c90b6.firebaseapp.com",
-            projectId: "raspisanie-c90b6",
-            storageBucket: "raspisanie-c90b6.firebasestorage.app",
-            messagingSenderId: "867699750609",
-            appId: "1:867699750609:web:6cbf1c0c8bfa429b0337f0"
-        };
-        const appId = firebaseConfig.appId.split(':')[1];
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
+
         // --- FIREBASE ИМПОРТЫ ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -355,19 +348,22 @@
          */
         async function initializeAppAndAuth() {
             try {
-                if (!firebaseConfig.apiKey) {
-                    throw new Error("Отсутствует конфигурация Firebase. Пожалуйста, убедитесь, что переменные среды настроены правильно.");
+                if (!firebaseConfig) {
+                    console.error("Ошибка: Firebase-конфигурация отсутствует.");
+                    showMessage("Ошибка инициализации приложения.", "error");
+                    return;
                 }
 
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-
-                const signPromise = initialAuthToken
-                    ? signInWithCustomToken(auth, initialAuthToken)
-                    : signInAnonymously(auth);
-
-                await signPromise;
+                
+                // Проверяем, предоставлен ли пользовательский токен
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
 
                 // Используем onAuthStateChanged для отслеживания состояния аутентификации
                 // Это гарантирует, что мы получим пользователя, прежде чем начнем работать с Firestore.
@@ -974,169 +970,6 @@
                 }
             }
         });
-
-        // Фильтрация расписания для пользователя
-        facultyFilter.addEventListener('change', () => {
-            const selectedFacultyId = facultyFilter.value;
-            const groupsToDisplay = selectedFacultyId
-                ? groups.filter(g => g.facultyId === selectedFacultyId)
-                : groups;
-
-            groupFilter.innerHTML = '<option value="">Выберите группу</option>';
-            groupsToDisplay.forEach(g => {
-                const option = document.createElement('option');
-                option.value = g.id;
-                option.textContent = g.name;
-                groupFilter.appendChild(option);
-            });
-            renderSchedule();
-        });
-
-        groupFilter.addEventListener('change', renderSchedule);
-        dayFilter.addEventListener('change', renderSchedule);
-        weekTypeFilter.addEventListener('change', renderSchedule);
-        
-        // --- CRUD-ОПЕРАЦИИ С FIREBASE ---
-
-        /**
-         * Добавляет новый факультет в Firestore.
-         * @param {string} name Название факультета.
-         */
-        async function addFaculty(name) {
-            try {
-                const facultyRef = collection(db, `artifacts/${appId}/public/data/faculties`);
-                await addDoc(facultyRef, { name });
-                showMessage("Факультет успешно добавлен.", "success");
-            } catch (e) {
-                console.error("Ошибка при добавлении факультета: ", e);
-                showMessage("Ошибка при добавлении факультета.", "error");
-            }
-        }
-
-        /**
-         * Обновляет существующий факультет в Firestore.
-         * @param {string} id Идентификатор факультета.
-         * @param {string} name Новое название.
-         */
-        async function updateFaculty(id, name) {
-            try {
-                const facultyRef = doc(db, `artifacts/${appId}/public/data/faculties`, id);
-                await updateDoc(facultyRef, { name });
-                showMessage("Факультет успешно обновлен.", "success");
-            } catch (e) {
-                console.error("Ошибка при обновлении факультета: ", e);
-                showMessage("Ошибка при обновлении факультета.", "error");
-            }
-        }
-
-        /**
-         * Удаляет факультет из Firestore.
-         * @param {string} id Идентификатор факультета.
-         */
-        async function deleteFaculty(id) {
-            try {
-                const facultyRef = doc(db, `artifacts/${appId}/public/data/faculties`, id);
-                await deleteDoc(facultyRef);
-                showMessage("Факультет успешно удален.", "success");
-            } catch (e) {
-                console.error("Ошибка при удалении факультета: ", e);
-                showMessage("Ошибка при удалении факультета.", "error");
-            }
-        }
-
-        /**
-         * Добавляет новую группу в Firestore.
-         * @param {string} name Название группы.
-         * @param {string} facultyId Идентификатор факультета.
-         */
-        async function addGroup(name, facultyId) {
-            try {
-                const groupRef = collection(db, `artifacts/${appId}/public/data/groups`);
-                await addDoc(groupRef, { name, facultyId });
-                showMessage("Группа успешно добавлена.", "success");
-            } catch (e) {
-                console.error("Ошибка при добавлении группы: ", e);
-                showMessage("Ошибка при добавлении группы.", "error");
-            }
-        }
-
-        /**
-         * Обновляет существующую группу в Firestore.
-         * @param {string} id Идентификатор группы.
-         * @param {string} name Новое название.
-         * @param {string} facultyId Идентификатор факультета.
-         */
-        async function updateGroup(id, name, facultyId) {
-            try {
-                const groupRef = doc(db, `artifacts/${appId}/public/data/groups`, id);
-                await updateDoc(groupRef, { name, facultyId });
-                showMessage("Группа успешно обновлена.", "success");
-            } catch (e) {
-                console.error("Ошибка при обновлении группы: ", e);
-                showMessage("Ошибка при обновлении группы.", "error");
-            }
-        }
-
-        /**
-         * Удаляет группу из Firestore.
-         * @param {string} id Идентификатор группы.
-         */
-        async function deleteGroup(id) {
-            try {
-                const groupRef = doc(db, `artifacts/${appId}/public/data/groups`, id);
-                await deleteDoc(groupRef);
-                showMessage("Группа успешно удалена.", "success");
-            } catch (e) {
-                console.error("Ошибка при удалении группы: ", e);
-                showMessage("Ошибка при удалении группы.", "error");
-            }
-        }
-        
-        /**
-         * Добавляет новую запись расписания в Firestore.
-         * @param {object} entry Объект с данными о занятии.
-         */
-        async function addScheduleEntry(entry) {
-            try {
-                const scheduleRef = collection(db, `artifacts/${appId}/public/data/schedule`);
-                await addDoc(scheduleRef, entry);
-                showMessage("Занятие успешно добавлено.", "success");
-            } catch (e) {
-                console.error("Ошибка при добавлении занятия: ", e);
-                showMessage("Ошибка при добавлении занятия.", "error");
-            }
-        }
-
-        /**
-         * Обновляет существующую запись расписания в Firestore.
-         * @param {string} id Идентификатор записи.
-         * @param {object} entry Новые данные о занятии.
-         */
-        async function updateScheduleEntry(id, entry) {
-            try {
-                const scheduleRef = doc(db, `artifacts/${appId}/public/data/schedule`, id);
-                await updateDoc(scheduleRef, entry);
-                showMessage("Занятие успешно обновлено.", "success");
-            } catch (e) {
-                console.error("Ошибка при обновлении занятия: ", e);
-                showMessage("Ошибка при обновлении занятия.", "error");
-            }
-        }
-
-        /**
-         * Удаляет запись расписания из Firestore.
-         * @param {string} id Идентификатор записи.
-         */
-        async function deleteScheduleEntry(id) {
-            try {
-                const scheduleRef = doc(db, `artifacts/${appId}/public/data/schedule`, id);
-                await deleteDoc(scheduleRef);
-                showMessage("Занятие успешно удалено.", "success");
-            } catch (e) {
-                console.error("Ошибка при удалении занятия: ", e);
-                showMessage("Ошибка при удалении занятия.", "error");
-            }
-        }
 
         // Фильтрация расписания для пользователя
         facultyFilter.addEventListener('change', () => {
