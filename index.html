@@ -18,7 +18,6 @@
         .page.active {
             display: block;
         }
-        /* Style for the week type badge */
         .week-badge {
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
@@ -37,6 +36,17 @@
         .week-badge.even {
             background-color: #a5f3fc; /* cyan-300 */
             color: #0891b2; /* cyan-700 */
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #4f46e5;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -65,13 +75,11 @@
                 <div class="mb-4 space-y-4">
                     <div class="space-y-2">
                         <label for="facultyFilter" class="block text-sm font-medium text-gray-700">Факультет:</label>
-                        <select id="facultyFilter" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
-                            </select>
+                        <select id="facultyFilter" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"></select>
                     </div>
                     <div class="space-y-2">
                         <label for="groupFilter" class="block text-sm font-medium text-gray-700">Группа:</label>
-                        <select id="groupFilter" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
-                            </select>
+                        <select id="groupFilter" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"></select>
                     </div>
                     <div class="space-y-2">
                         <label for="dayFilter" class="block text-sm font-medium text-gray-700">День:</label>
@@ -90,7 +98,10 @@
                     </div>
                 </div>
                 <div id="scheduleList" class="space-y-6">
+                    <div class="flex items-center justify-center p-8">
+                        <div class="spinner"></div>
                     </div>
+                </div>
             </div>
 
             <div id="password_page" class="page">
@@ -129,11 +140,11 @@
                 </div>
                 <div class="space-y-2 mb-4">
                     <label for="groupSelect" class="block text-sm font-medium text-gray-700">Выберите группу:</label>
-                    <select id="groupSelect" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
-                        </select>
+                    <select id="groupSelect" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"></select>
                 </div>
                 <div id="scheduleAdminList" class="space-y-6">
-                    </div>
+                    <p class="text-gray-500 text-center text-sm">Пожалуйста, выберите группу.</p>
+                </div>
             </div>
 
             <div id="faculties_page" class="page">
@@ -146,7 +157,8 @@
                     </button>
                 </div>
                 <div id="facultiesList" class="space-y-4">
-                    </div>
+                    <p class="text-gray-500 text-center text-sm">Нет доступных факультетов.</p>
+                </div>
             </div>
 
             <div id="groups_page" class="page">
@@ -159,7 +171,8 @@
                     </button>
                 </div>
                 <div id="groupsList" class="space-y-4">
-                    </div>
+                    <p class="text-gray-500 text-center text-sm">Нет доступных групп.</p>
+                </div>
             </div>
 
             <div id="faculty_edit_page" class="page">
@@ -178,14 +191,13 @@
                             </svg>
                         </button>
                     </div>
-                    <div id="facultyGroupsList" class="space-y-2">
-                        </div>
+                    <div id="facultyGroupsList" class="space-y-2"></div>
                 </div>
             </div>
 
             <div id="group_edit_page" class="page">
                 <h2 id="groupFormTitle" class="text-2xl font-semibold text-gray-800 mb-4"></h2>
-                <select id="groupFacultySelect" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 mb-4">
+                <select id="groupFacultySelect" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
                     <option value="">Выберите факультет</option>
                 </select>
                 <input id="groupNameInput" type="text" placeholder="Название группы" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 mb-4">
@@ -199,8 +211,7 @@
                     <div class="mt-3 text-center">
                         <h3 class="text-lg leading-6 font-medium text-gray-900">Добавить группы</h3>
                         <div class="mt-2 px-7 py-3">
-                            <div id="availableGroupsList" class="space-y-2">
-                                </div>
+                            <div id="availableGroupsList" class="space-y-2"></div>
                         </div>
                         <div class="items-center px-4 py-3">
                             <button id="closeModalButton" class="px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-xl hover:bg-gray-300 transition-colors duration-200 w-full">
@@ -251,10 +262,9 @@
 
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    <script>
-        // --- FIREBASE CONFIGURATION ---
+    <script type="module">
+        // Глобальные переменные, предоставляемые средой Canvas
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "firebase/app";
         // TODO: Add SDKs for Firebase products that you want to use
@@ -262,35 +272,38 @@
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyB2kuT1fSPp4kBKeEad_rYXMqh27z2KDO0",
-            authDomain: "raspisanie-c90b6.firebaseapp.com",
-            projectId: "raspisanie-c90b6",
-            storageBucket: "raspisanie-c90b6.firebasestorage.app",
-            messagingSenderId: "867699750609",
-            appId: "1:867699750609:web:6cbf1c0c8bfa429b0337f0"
+          apiKey: "AIzaSyB2kuT1fSPp4kBKeEad_rYXMqh27z2KDO0",
+          authDomain: "raspisanie-c90b6.firebaseapp.com",
+          projectId: "raspisanie-c90b6",
+          storageBucket: "raspisanie-c90b6.firebasestorage.app",
+          messagingSenderId: "867699750609",
+          appId: "1:867699750609:web:6cbf1c0c8bfa429b0337f0"
         };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // --- DATA AND STATE MANAGEMENT ---
-        const ADMIN_PASSWORD = 'admin';
+        // --- FIREBASE ИМПОРТЫ ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- ДАННЫЕ И СОСТОЯНИЕ ---
         let faculties = [];
         let groups = [];
         let schedule = [];
+        let db;
+        let auth;
+        let userId;
 
-        let currentFacultyId = null;
-        let currentGroupId = null;
-        let currentScheduleEntryId = null;
-
-        // --- NAVIGATION STATE ---
+        // --- СОСТОЯНИЕ НАВИГАЦИИ ---
         const pageHistory = ['schedule_page'];
         const pageTitle = document.getElementById('pageTitle');
         
-        // --- DOM ELEMENTS ---
+        // --- DOM ЭЛЕМЕНТЫ ---
         const pages = document.querySelectorAll('.page');
         const showAdminButton = document.getElementById('showAdminButton');
-        const showScheduleAdminButton = document.getElementById('showScheduleAdminButton');
         const backButton = document.getElementById('backButton');
         const facultiesList = document.getElementById('facultiesList');
         const groupsList = document.getElementById('groupsList');
@@ -309,7 +322,19 @@
         const adminPasswordInput = document.getElementById('adminPasswordInput');
         const messageBox = document.getElementById('messageBox');
         
-        // Schedule admin elements
+        // Элементы админ-панели
+        const showFacultiesButton = document.getElementById('showFacultiesButton');
+        const showGroupsButton = document.getElementById('showGroupsButton');
+        const showScheduleAdminButton = document.getElementById('showScheduleAdminButton');
+        const addFacultyButton = document.getElementById('addFacultyButton');
+        const addGroupButton = document.getElementById('addGroupButton');
+        const addGroupsToFacultyButton = document.getElementById('addGroupsToFacultyButton');
+        const saveFacultyButton = document.getElementById('saveFacultyButton');
+        const saveGroupButton = document.getElementById('saveGroupButton');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const submitPasswordButton = document.getElementById('submitPasswordButton');
+
+        // Элементы админ-панели расписания
         const groupSelect = document.getElementById('groupSelect');
         const scheduleAdminList = document.getElementById('scheduleAdminList');
         const addScheduleEntryButton = document.getElementById('addScheduleEntryButton');
@@ -322,57 +347,127 @@
         const saveScheduleEntryButton = document.getElementById('saveScheduleEntryButton');
         const closeScheduleModalButton = document.getElementById('closeScheduleModalButton');
 
-        // --- TELEGRAM WEB APP INTEGRATION ---
-        const WebApp = window.Telegram.WebApp;
+        // Текущее состояние для редактирования
+        let currentFacultyId = null;
+        let currentGroupId = null;
+        let currentScheduleEntryId = null;
 
+        // --- ИНТЕГРАЦИЯ С TELEGRAM WEB APP ---
+        const WebApp = window.Telegram.WebApp;
         WebApp.ready();
         WebApp.onEvent('backButtonClicked', goBack);
 
-        // --- CORE FUNCTIONS ---
+        // --- ФУНКЦИИ ИНИЦИАЛИЗАЦИИ ---
+
+        /**
+         * Инициализирует Firebase и настраивает слушателей данных.
+         */
+        async function initializeAppAndAuth() {
+            try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                    throw new Error("Firebase config is missing.");
+                }
+
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Используем onAuthStateChanged для отслеживания состояния аутентификации
+                // Это гарантирует, что мы получим пользователя, прежде чем начнем работать с Firestore.
+                // onAuthStateChanged вызывается один раз при загрузке, а затем при каждом изменении состояния.
+                auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        // После успешного входа начинаем прослушивать данные
+                        setupFirestoreListeners();
+                    } else {
+                        // Если токен отсутствует, входим анонимно
+                        await signInAnonymously(auth);
+                    }
+                });
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Ошибка инициализации Firebase:", error);
+                showMessage("Ошибка инициализации приложения.", "error");
+            }
+        }
+
+        /**
+         * Настраивает слушателей для коллекций Firestore.
+         */
+        function setupFirestoreListeners() {
+            const facultyCollectionRef = collection(db, `artifacts/${appId}/public/data/faculties`);
+            const groupCollectionRef = collection(db, `artifacts/${appId}/public/data/groups`);
+            const scheduleCollectionRef = collection(db, `artifacts/${appId}/public/data/schedule`);
+
+            onSnapshot(facultyCollectionRef, (snapshot) => {
+                faculties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderFaculties();
+                renderGroupFacultySelect();
+                renderFacultyAndGroupFilters();
+            });
+
+            onSnapshot(groupCollectionRef, (snapshot) => {
+                groups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderGroups();
+                renderAvailableGroups();
+                renderGroupSelect();
+                renderFacultyAndGroupFilters();
+            });
+
+            onSnapshot(scheduleCollectionRef, (snapshot) => {
+                schedule = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderSchedule();
+                renderScheduleAdminList();
+            });
+        }
+
+        // --- ФУНКЦИИ НАВИГАЦИИ ---
+
+        /**
+         * Отображает указанную страницу и управляет историей навигации.
+         * @param {string} pageId Идентификатор страницы для отображения.
+         */
         function showPage(pageId) {
             pages.forEach(page => page.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
             
             if (pageHistory[pageHistory.length - 1] !== pageId) {
                 pageHistory.push(pageId);
             }
             
             updateNavigationUI();
-            
-            if (pageId === 'faculties_page') {
-                renderFaculties();
-            } else if (pageId === 'groups_page') {
-                renderGroups();
-            } else if (pageId === 'schedule_page') {
-                renderSchedule();
-            } else if (pageId === 'schedule_admin_page') {
-                renderGroupSelect();
-                renderScheduleAdminList();
-            } else if (pageId === 'group_edit_page') {
-                renderGroupFacultySelect();
-            }
         }
 
+        /**
+         * Возвращается к предыдущей странице в истории.
+         */
         function goBack() {
             if (pageHistory.length > 1) {
                 pageHistory.pop();
                 const lastPageId = pageHistory[pageHistory.length - 1];
                 pages.forEach(page => page.classList.remove('active'));
-                document.getElementById(lastPageId).classList.add('active');
-                updateNavigationUI();
-                
-                if (lastPageId === 'faculties_page') {
-                    renderFaculties();
-                } else if (lastPageId === 'groups_page') {
-                    renderGroups();
-                } else if (lastPageId === 'schedule_page') {
-                    renderSchedule();
+                const targetPage = document.getElementById(lastPageId);
+                if (targetPage) {
+                    targetPage.classList.add('active');
                 }
+                updateNavigationUI();
             } else {
                 WebApp.close();
             }
         }
 
+        /**
+         * Обновляет элементы управления навигацией (кнопка "Назад" и заголовок страницы).
+         */
         function updateNavigationUI() {
             if (pageHistory.length > 1) {
                 WebApp.BackButton.show();
@@ -386,44 +481,30 @@
 
             const currentPage = pageHistory[pageHistory.length - 1];
             switch (currentPage) {
-                case 'schedule_page':
-                    pageTitle.textContent = 'Расписание';
-                    break;
-                case 'password_page':
-                    pageTitle.textContent = 'Вход';
-                    break;
-                case 'admin_page':
-                    pageTitle.textContent = 'Администрирование';
-                    break;
-                case 'faculties_page':
-                    pageTitle.textContent = 'Факультеты';
-                    break;
-                case 'groups_page':
-                    pageTitle.textContent = 'Группы';
-                    break;
-                case 'schedule_admin_page':
-                    pageTitle.textContent = 'Редактирование расписания';
-                    break;
-                case 'faculty_edit_page':
-                    pageTitle.textContent = 'Редактирование факультета';
-                    break;
-                case 'group_edit_page':
-                    pageTitle.textContent = 'Редактирование группы';
-                    break;
-                default:
-                    pageTitle.textContent = 'Страница';
+                case 'schedule_page': pageTitle.textContent = 'Расписание'; break;
+                case 'password_page': pageTitle.textContent = 'Вход'; break;
+                case 'admin_page': pageTitle.textContent = 'Администрирование'; break;
+                case 'faculties_page': pageTitle.textContent = 'Факультеты'; renderFaculties(); break;
+                case 'groups_page': pageTitle.textContent = 'Группы'; renderGroups(); break;
+                case 'schedule_admin_page': pageTitle.textContent = 'Редактирование расписания'; renderGroupSelect(); renderScheduleAdminList(); break;
+                case 'faculty_edit_page': pageTitle.textContent = 'Редактирование факультета'; break;
+                case 'group_edit_page': pageTitle.textContent = 'Редактирование группы'; break;
+                default: pageTitle.textContent = 'Страница';
             }
         }
         
+        /**
+         * Отображает временное сообщение в нижней части экрана.
+         * @param {string} message Текст сообщения.
+         * @param {string} type Тип сообщения ('success' или 'error').
+         */
         function showMessage(message, type) {
             messageBox.textContent = message;
-            messageBox.classList.remove('opacity-0', 'bg-red-200', 'text-red-800', 'bg-green-200', 'text-green-800', 'bg-blue-200', 'text-blue-800');
+            messageBox.classList.remove('opacity-0', 'bg-red-200', 'text-red-800', 'bg-green-200', 'text-green-800');
             if (type === 'success') {
                 messageBox.classList.add('bg-green-200', 'text-green-800');
             } else if (type === 'error') {
                 messageBox.classList.add('bg-red-200', 'text-red-800');
-            } else {
-                messageBox.classList.add('bg-blue-200', 'text-blue-800');
             }
             messageBox.classList.add('opacity-100');
             setTimeout(() => {
@@ -432,10 +513,17 @@
             }, 3000);
         }
 
-        // --- RENDERING FUNCTIONS ---
+        // --- РЕНДЕРИНГ ЭЛЕМЕНТОВ ---
 
+        /**
+         * Рендерит список факультетов.
+         */
         function renderFaculties() {
             facultiesList.innerHTML = '';
+            if (faculties.length === 0) {
+                facultiesList.innerHTML = `<p class="text-gray-500 text-center text-sm">Нет доступных факультетов.</p>`;
+                return;
+            }
             faculties.forEach(faculty => {
                 const facultyGroupsCount = groups.filter(g => g.facultyId === faculty.id).length;
                 const item = document.createElement('div');
@@ -454,8 +542,15 @@
             });
         }
 
+        /**
+         * Рендерит список групп.
+         */
         function renderGroups() {
             groupsList.innerHTML = '';
+            if (groups.length === 0) {
+                groupsList.innerHTML = `<p class="text-gray-500 text-center text-sm">Нет доступных групп.</p>`;
+                return;
+            }
             groups.forEach(group => {
                 const faculty = faculties.find(f => f.id === group.facultyId);
                 const facultyName = faculty ? faculty.name : 'Без факультета';
@@ -475,6 +570,9 @@
             });
         }
 
+        /**
+         * Рендерит выпадающий список факультетов для редактирования группы.
+         */
         function renderGroupFacultySelect() {
             groupFacultySelect.innerHTML = '<option value="">Выберите факультет</option>';
             faculties.forEach(faculty => {
@@ -485,6 +583,10 @@
             });
         }
 
+        /**
+         * Рендерит список групп, привязанных к факультету.
+         * @param {string} facultyId Идентификатор факультета.
+         */
         function renderFacultyGroups(facultyId) {
             facultyGroupsList.innerHTML = '';
             const facultyGroups = groups.filter(g => g.facultyId === facultyId);
@@ -502,9 +604,12 @@
             });
         }
 
+        /**
+         * Рендерит список доступных групп для добавления к факультету.
+         */
         function renderAvailableGroups() {
             availableGroupsList.innerHTML = '';
-            const availableGroups = groups.filter(g => g.facultyId === null || g.facultyId === "");
+            const availableGroups = groups.filter(g => !g.facultyId);
             if (availableGroups.length === 0) {
                 availableGroupsList.innerHTML = `<p class="text-gray-500 text-sm">Все группы уже привязаны к факультетам.</p>`;
             }
@@ -519,14 +624,44 @@
             });
         }
 
+        /**
+         * Рендерит выпадающие списки для фильтрации расписания.
+         */
+        function renderFacultyAndGroupFilters() {
+            // Рендерим фильтр факультетов
+            const currentFacultyValue = facultyFilter.value;
+            facultyFilter.innerHTML = '<option value="all">Все факультеты</option>';
+            faculties.forEach(faculty => {
+                const option = document.createElement('option');
+                option.value = faculty.id;
+                option.textContent = faculty.name;
+                facultyFilter.appendChild(option);
+            });
+            facultyFilter.value = currentFacultyValue;
+
+            // Рендерим фильтр групп на основе выбранного факультета
+            const selectedFacultyId = facultyFilter.value === 'all' ? null : facultyFilter.value;
+            const currentGroupValue = groupFilter.value;
+            groupFilter.innerHTML = '<option value="all">Выберите группу</option>';
+            const filteredGroups = selectedFacultyId ? groups.filter(g => g.facultyId === selectedFacultyId) : groups;
+            filteredGroups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group.id;
+                option.textContent = group.name;
+                groupFilter.appendChild(option);
+            });
+            groupFilter.value = currentGroupValue;
+        }
+
+        /**
+         * Рендерит расписание для выбранной группы с учетом фильтров.
+         */
         function renderSchedule() {
             scheduleList.innerHTML = '';
-            renderFacultyAndGroupFilters(); // Re-render filters
-            const selectedFacultyId = facultyFilter.value === 'all' ? null : facultyFilter.value;
             const selectedGroupId = groupFilter.value === 'all' ? null : groupFilter.value;
             const dayFilterValue = dayFilter.value;
             const weekTypeFilterValue = weekTypeFilter.value;
-            const daysOfWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+            const daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
             
             if (!selectedGroupId) {
                 scheduleList.innerHTML = `<p class="text-gray-500 text-center text-sm">Пожалуйста, выберите факультет и группу для просмотра расписания.</p>`;
@@ -542,7 +677,7 @@
 
             if (dayFilterValue === 'today') {
                 const today = new Date().getDay();
-                const todayName = daysOfWeek[today];
+                const todayName = daysOfWeek[today - 1]; // getDay() returns 0 for Sunday
                 filteredSchedule = filteredSchedule.filter(item => item.day === todayName);
             }
 
@@ -580,79 +715,67 @@
                 }
                 const badgeClass = item.weekType === 'odd' ? 'odd' : item.weekType === 'even' ? 'even' : 'all';
                 const badgeText = item.weekType === 'odd' ? 'Нечетная' : item.weekType === 'even' ? 'Четная' : 'Все недели';
-                const entry = document.createElement('div');
-                entry.className = 'bg-white p-4 rounded-xl shadow-sm flex items-center justify-between';
-                entry.innerHTML = `
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-lg font-semibold text-gray-900">${item.subject}</span>
-                            <span class="week-badge ${badgeClass}">${badgeText}</span>
+                const itemHTML = `
+                    <div class="bg-gray-50 p-4 rounded-xl shadow-sm flex items-center justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold text-gray-900">${item.time}</span>
+                                <span class="week-badge ${badgeClass}">${badgeText}</span>
+                            </div>
+                            <p class="text-sm text-gray-700">${item.subject}</p>
                         </div>
-                        <p class="text-sm text-gray-600">${item.time}</p>
                     </div>
                 `;
-                scheduleList.appendChild(entry);
+                scheduleList.insertAdjacentHTML('beforeend', itemHTML);
             });
         }
-
-        function renderFacultyAndGroupFilters() {
-            // Populate Faculty Filter
-            facultyFilter.innerHTML = '<option value="all">Все факультеты</option>';
-            faculties.forEach(f => {
-                const option = document.createElement('option');
-                option.value = f.id;
-                option.textContent = f.name;
-                facultyFilter.appendChild(option);
-            });
-
-            // Populate Group Filter based on selected faculty
-            const selectedFacultyId = facultyFilter.value === 'all' ? null : facultyFilter.value;
-            groupFilter.innerHTML = '<option value="all">Все группы</option>';
-            const groupsToDisplay = selectedFacultyId ? groups.filter(g => g.facultyId === selectedFacultyId) : groups;
-            groupsToDisplay.forEach(g => {
-                const option = document.createElement('option');
-                option.value = g.id;
-                option.textContent = g.name;
-                groupFilter.appendChild(option);
-            });
-        }
-
+        
+        /**
+         * Рендерит выпадающий список групп для админ-панели расписания.
+         */
         function renderGroupSelect() {
-            groupSelect.innerHTML = '';
+            groupSelect.innerHTML = '<option value="">Выберите группу</option>';
             groups.forEach(group => {
                 const option = document.createElement('option');
                 option.value = group.id;
                 option.textContent = group.name;
                 groupSelect.appendChild(option);
             });
-            currentGroupId = groupSelect.value;
-            renderScheduleAdminList();
         }
 
+        /**
+         * Рендерит список расписания для админ-панели выбранной группы.
+         */
         function renderScheduleAdminList() {
+            const selectedGroupId = groupSelect.value;
+            const selectedGroup = groups.find(g => g.id === selectedGroupId);
             scheduleAdminList.innerHTML = '';
-            if (!currentGroupId) {
-                scheduleAdminList.innerHTML = `<p class="text-gray-500 text-center text-sm">Выберите группу для управления расписанием.</p>`;
+            if (!selectedGroup) {
+                scheduleAdminList.innerHTML = `<p class="text-gray-500 text-center text-sm">Пожалуйста, выберите группу.</p>`;
                 return;
             }
-
-            const selectedGroup = groups.find(g => g.id === currentGroupId);
-            if (!selectedGroup) return;
 
             const filteredSchedule = schedule.filter(item => item.group === selectedGroup.name);
             const daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
             filteredSchedule.sort((a, b) => {
                 const dayA = daysOfWeek.indexOf(a.day);
                 const dayB = daysOfWeek.indexOf(b.day);
-                if (dayA !== dayB) return dayA - dayB;
-                return a.time.localeCompare(b.time);
+                if (dayA !== dayB) {
+                    return dayA - dayB;
+                }
+                const timeA = a.time.split(':').map(Number);
+                const timeB = b.time.split(':').map(Number);
+                if (timeA[0] !== timeB[0]) {
+                    return timeA[0] - timeB[0];
+                }
+                return timeA[1] - timeB[1];
             });
 
             if (filteredSchedule.length === 0) {
-                scheduleAdminList.innerHTML = `<p class="text-gray-500 text-center text-sm">Расписание для этой группы пока пусто.</p>`;
+                scheduleAdminList.innerHTML = `<p class="text-gray-500 text-center text-sm">В этой группе пока нет расписания.</p>`;
                 return;
             }
-
+            
             let currentDay = '';
             filteredSchedule.forEach(item => {
                 if (item.day !== currentDay) {
@@ -662,101 +785,219 @@
                     scheduleAdminList.appendChild(dayHeader);
                     currentDay = item.day;
                 }
-                const entry = document.createElement('div');
-                entry.className = 'bg-white p-4 rounded-xl shadow-sm flex items-center justify-between';
-                entry.innerHTML = `
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-lg font-semibold text-gray-900">${item.subject}</span>
-                            <span class="week-badge ${item.weekType === 'odd' ? 'odd' : item.weekType === 'even' ? 'even' : 'all'}">${item.weekType === 'odd' ? 'Нечетная' : item.weekType === 'even' ? 'Четная' : 'Все'}</span>
+
+                const badgeClass = item.weekType === 'odd' ? 'odd' : item.weekType === 'even' ? 'even' : 'all';
+                const badgeText = item.weekType === 'odd' ? 'Нечетная' : item.weekType === 'even' ? 'Четная' : 'Все недели';
+                const itemHTML = `
+                    <div class="bg-gray-50 p-4 rounded-xl shadow-sm flex items-center justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold text-gray-900">${item.time}</span>
+                                <span class="week-badge ${badgeClass}">${badgeText}</span>
+                            </div>
+                            <p class="text-sm text-gray-700">${item.subject}</p>
                         </div>
-                        <p class="text-sm text-gray-600">${item.time}</p>
-                    </div>
-                    <div>
-                        <button class="edit-schedule-btn text-blue-500 hover:text-blue-700 font-medium transition-colors duration-200 mr-2" data-id="${item.id}">Изменить</button>
-                        <button class="delete-schedule-btn text-red-500 hover:text-red-700 font-medium transition-colors duration-200" data-id="${item.id}">Удалить</button>
+                        <div class="flex space-x-2">
+                            <button class="edit-schedule-btn text-blue-500 hover:text-blue-700" data-id="${item.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                                    <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <button class="delete-schedule-btn text-red-500 hover:text-red-700" data-id="${item.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 `;
-                scheduleAdminList.appendChild(entry);
+                scheduleAdminList.insertAdjacentHTML('beforeend', itemHTML);
             });
         }
 
+        // --- ФУНКЦИИ УПРАВЛЕНИЯ ДАННЫМИ ---
 
-        // --- EVENT LISTENERS ---
-
-        // General navigation
-        showAdminButton.addEventListener('click', () => showPage('password_page'));
-        backButton.addEventListener('click', goBack);
-        
-        // Admin password
-        document.getElementById('submitPasswordButton').addEventListener('click', () => {
-            if (adminPasswordInput.value === ADMIN_PASSWORD) {
-                showPage('admin_page');
-                adminPasswordInput.value = '';
-            } else {
-                showMessage("Неверный пароль", "error");
+        /**
+         * Сохраняет или обновляет факультет в Firestore.
+         */
+        async function saveFaculty() {
+            const facultyName = facultyNameInput.value.trim();
+            if (!facultyName) {
+                showMessage('Название факультета не может быть пустым.', 'error');
+                return;
             }
-        });
-        
-        // Admin page buttons
-        document.getElementById('showFacultiesButton').addEventListener('click', () => showPage('faculties_page'));
-        document.getElementById('showGroupsButton').addEventListener('click', () => showPage('groups_page'));
-        document.getElementById('showScheduleAdminButton').addEventListener('click', () => {
-            showPage('schedule_admin_page');
-            renderGroupSelect();
+
+            try {
+                if (currentFacultyId) {
+                    const facultyRef = doc(db, `artifacts/${appId}/public/data/faculties`, currentFacultyId);
+                    await setDoc(facultyRef, { name: facultyName }, { merge: true });
+                    showMessage('Факультет успешно обновлен!', 'success');
+                } else {
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/faculties`), { name: facultyName });
+                    showMessage('Факультет успешно добавлен!', 'success');
+                }
+                showPage('faculties_page');
+            } catch (error) {
+                console.error("Ошибка сохранения факультета:", error);
+                showMessage('Не удалось сохранить факультет.', 'error');
+            }
+        }
+
+        /**
+         * Удаляет факультет.
+         * @param {string} facultyId Идентификатор факультета для удаления.
+         */
+        async function deleteFaculty(facultyId) {
+            try {
+                // Отвязываем группы от этого факультета
+                const facultyGroups = groups.filter(g => g.facultyId === facultyId);
+                const batch = [];
+                facultyGroups.forEach(group => {
+                    const groupRef = doc(db, `artifacts/${appId}/public/data/groups`, group.id);
+                    batch.push(updateDoc(groupRef, { facultyId: null }));
+                });
+                await Promise.all(batch);
+
+                await deleteDoc(doc(db, `artifacts/${appId}/public/data/faculties`, facultyId));
+                showMessage('Факультет и связанные с ним группы успешно удалены!', 'success');
+            } catch (error) {
+                console.error("Ошибка удаления факультета:", error);
+                showMessage('Не удалось удалить факультет.', 'error');
+            }
+        }
+
+        /**
+         * Сохраняет или обновляет группу.
+         */
+        async function saveGroup() {
+            const groupName = groupNameInput.value.trim();
+            const facultyId = groupFacultySelect.value || null;
+            if (!groupName) {
+                showMessage('Название группы не может быть пустым.', 'error');
+                return;
+            }
+
+            try {
+                const groupData = { name: groupName, facultyId: facultyId };
+                if (currentGroupId) {
+                    const groupRef = doc(db, `artifacts/${appId}/public/data/groups`, currentGroupId);
+                    await setDoc(groupRef, groupData, { merge: true });
+                    showMessage('Группа успешно обновлена!', 'success');
+                } else {
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/groups`), groupData);
+                    showMessage('Группа успешно добавлена!', 'success');
+                }
+                showPage('groups_page');
+            } catch (error) {
+                console.error("Ошибка сохранения группы:", error);
+                showMessage('Не удалось сохранить группу.', 'error');
+            }
+        }
+
+        /**
+         * Удаляет группу.
+         * @param {string} groupId Идентификатор группы для удаления.
+         */
+        async function deleteGroup(groupId) {
+            try {
+                // Удаляем расписание, связанное с этой группой
+                const group = groups.find(g => g.id === groupId);
+                if (group) {
+                    const groupSchedule = schedule.filter(s => s.group === group.name);
+                    const batch = [];
+                    groupSchedule.forEach(item => {
+                        const scheduleRef = doc(db, `artifacts/${appId}/public/data/schedule`, item.id);
+                        batch.push(deleteDoc(scheduleRef));
+                    });
+                    await Promise.all(batch);
+                }
+
+                await deleteDoc(doc(db, `artifacts/${appId}/public/data/groups`, groupId));
+                showMessage('Группа и ее расписание успешно удалены!', 'success');
+            } catch (error) {
+                console.error("Ошибка удаления группы:", error);
+                showMessage('Не удалось удалить группу.', 'error');
+            }
+        }
+
+        /**
+         * Сохраняет или обновляет запись расписания.
+         */
+        async function saveScheduleEntry() {
+            const selectedGroup = groups.find(g => g.id === groupSelect.value);
+            if (!selectedGroup) {
+                showMessage('Сначала выберите группу.', 'error');
+                return;
+            }
+
+            const scheduleData = {
+                group: selectedGroup.name,
+                day: scheduleDayInput.value,
+                time: scheduleTimeInput.value,
+                subject: scheduleSubjectInput.value.trim(),
+                weekType: scheduleWeekTypeInput.value
+            };
+
+            if (!scheduleData.subject) {
+                showMessage('Название предмета не может быть пустым.', 'error');
+                return;
+            }
+
+            try {
+                if (currentScheduleEntryId) {
+                    const scheduleRef = doc(db, `artifacts/${appId}/public/data/schedule`, currentScheduleEntryId);
+                    await setDoc(scheduleRef, scheduleData, { merge: true });
+                    showMessage('Запись расписания успешно обновлена!', 'success');
+                } else {
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/schedule`), scheduleData);
+                    showMessage('Запись расписания успешно добавлена!', 'success');
+                }
+                scheduleModal.classList.add('hidden');
+                renderScheduleAdminList();
+            } catch (error) {
+                console.error("Ошибка сохранения расписания:", error);
+                showMessage('Не удалось сохранить расписание.', 'error');
+            }
+        }
+
+        /**
+         * Удаляет запись расписания.
+         * @param {string} scheduleId Идентификатор записи для удаления.
+         */
+        async function deleteScheduleEntry(scheduleId) {
+            try {
+                await deleteDoc(doc(db, `artifacts/${appId}/public/data/schedule`, scheduleId));
+                showMessage('Запись расписания успешно удалена!', 'success');
+            } catch (error) {
+                console.error("Ошибка удаления расписания:", error);
+                showMessage('Не удалось удалить расписание.', 'error');
+            }
+        }
+
+        // --- ОБРАБОТЧИКИ СОБЫТИЙ ---
+
+        document.addEventListener('DOMContentLoaded', initializeAppAndAuth);
+
+        showAdminButton.addEventListener('click', () => {
+            showPage('admin_page');
         });
 
-        // Faculty management
-        document.getElementById('addFacultyButton').addEventListener('click', () => {
+        backButton.addEventListener('click', goBack);
+
+        showFacultiesButton.addEventListener('click', () => showPage('faculties_page'));
+        showGroupsButton.addEventListener('click', () => showPage('groups_page'));
+        showScheduleAdminButton.addEventListener('click', () => showPage('schedule_admin_page'));
+
+        addFacultyButton.addEventListener('click', () => {
             currentFacultyId = null;
             document.getElementById('facultyFormTitle').textContent = 'Добавить факультет';
             facultyNameInput.value = '';
             facultyGroupsSection.classList.add('hidden');
             showPage('faculty_edit_page');
         });
-        
-        facultiesList.addEventListener('click', (event) => {
-            if (event.target.classList.contains('edit-btn')) {
-                currentFacultyId = event.target.dataset.id;
-                const faculty = faculties.find(f => f.id === currentFacultyId);
-                if (faculty) {
-                    document.getElementById('facultyFormTitle').textContent = 'Редактировать факультет';
-                    facultyNameInput.value = faculty.name;
-                    facultyGroupsSection.classList.remove('hidden');
-                    renderFacultyGroups(currentFacultyId);
-                    showPage('faculty_edit_page');
-                }
-            } else if (event.target.classList.contains('delete-btn')) {
-                const facultyId = event.target.dataset.id;
-                db.collection("faculties").doc(facultyId).delete()
-                    .then(() => showMessage("Факультет успешно удален", "success"))
-                    .catch(error => showMessage("Ошибка при удалении: " + error, "error"));
-            }
-        });
 
-        document.getElementById('saveFacultyButton').addEventListener('click', () => {
-            const facultyName = facultyNameInput.value.trim();
-            if (facultyName) {
-                if (currentFacultyId) {
-                    db.collection("faculties").doc(currentFacultyId).update({ name: facultyName })
-                        .then(() => {
-                            showMessage("Факультет успешно обновлен", "success");
-                            showPage('faculties_page');
-                        })
-                        .catch(error => showMessage("Ошибка при обновлении: " + error, "error"));
-                } else {
-                    db.collection("faculties").add({ name: facultyName })
-                        .then(() => {
-                            showMessage("Факультет успешно добавлен", "success");
-                            showPage('faculties_page');
-                        })
-                        .catch(error => showMessage("Ошибка при добавлении: " + error, "error"));
-                }
-            }
-        });
-
-        // Group management
-        document.getElementById('addGroupButton').addEventListener('click', () => {
+        addGroupButton.addEventListener('click', () => {
             currentGroupId = null;
             document.getElementById('groupFormTitle').textContent = 'Добавить группу';
             groupNameInput.value = '';
@@ -764,92 +1005,20 @@
             showPage('group_edit_page');
         });
 
-        groupsList.addEventListener('click', (event) => {
-            if (event.target.classList.contains('edit-btn')) {
-                currentGroupId = event.target.dataset.id;
-                const group = groups.find(g => g.id === currentGroupId);
-                if (group) {
-                    document.getElementById('groupFormTitle').textContent = 'Редактировать группу';
-                    groupNameInput.value = group.name;
-                    groupFacultySelect.value = group.facultyId || '';
-                    showPage('group_edit_page');
-                }
-            } else if (event.target.classList.contains('delete-btn')) {
-                const groupId = event.target.dataset.id;
-                db.collection("groups").doc(groupId).delete()
-                    .then(() => showMessage("Группа успешно удалена", "success"))
-                    .catch(error => showMessage("Ошибка при удалении: " + error, "error"));
-            }
-        });
-
-        document.getElementById('saveGroupButton').addEventListener('click', () => {
-            const groupName = groupNameInput.value.trim();
-            const facultyId = groupFacultySelect.value || null;
-            if (groupName) {
-                if (currentGroupId) {
-                    db.collection("groups").doc(currentGroupId).update({ name: groupName, facultyId: facultyId })
-                        .then(() => {
-                            showMessage("Группа успешно обновлена", "success");
-                            showPage('groups_page');
-                        })
-                        .catch(error => showMessage("Ошибка при обновлении: " + error, "error"));
-                } else {
-                    db.collection("groups").add({ name: groupName, facultyId: facultyId })
-                        .then(() => {
-                            showMessage("Группа успешно добавлена", "success");
-                            showPage('groups_page');
-                        })
-                        .catch(error => showMessage("Ошибка при добавлении: " + error, "error"));
-                }
-            }
-        });
-
-        // Add/remove groups from faculty
-        document.getElementById('addGroupsToFacultyButton').addEventListener('click', () => {
+        addGroupsToFacultyButton.addEventListener('click', () => {
             renderAvailableGroups();
             addGroupsModal.classList.remove('hidden');
         });
 
-        document.getElementById('closeModalButton').addEventListener('click', () => {
+        closeModalButton.addEventListener('click', () => {
             addGroupsModal.classList.add('hidden');
-        });
-
-        availableGroupsList.addEventListener('click', (event) => {
-            if (event.target.classList.contains('add-group-btn')) {
-                const groupId = event.target.dataset.groupId;
-                db.collection("groups").doc(groupId).update({ facultyId: currentFacultyId })
-                    .then(() => {
-                        showMessage("Группа добавлена к факультету", "success");
-                        renderFacultyGroups(currentFacultyId);
-                        renderAvailableGroups();
-                    })
-                    .catch(error => showMessage("Ошибка: " + error, "error"));
-            }
-        });
-
-        facultyGroupsList.addEventListener('click', (event) => {
-            if (event.target.classList.contains('remove-group-btn')) {
-                const groupId = event.target.dataset.groupId;
-                db.collection("groups").doc(groupId).update({ facultyId: null })
-                    .then(() => {
-                        showMessage("Группа успешно убрана", "success");
-                        renderFacultyGroups(currentFacultyId);
-                    })
-                    .catch(error => showMessage("Ошибка: " + error, "error"));
-            }
-        });
-
-        // Schedule management
-        groupSelect.addEventListener('change', () => {
-            currentGroupId = groupSelect.value;
-            renderScheduleAdminList();
         });
 
         addScheduleEntryButton.addEventListener('click', () => {
             currentScheduleEntryId = null;
             scheduleModalTitle.textContent = 'Добавить занятие';
             scheduleDayInput.value = 'Понедельник';
-            scheduleTimeInput.value = '09:00';
+            scheduleTimeInput.value = '';
             scheduleSubjectInput.value = '';
             scheduleWeekTypeInput.value = 'all';
             scheduleModal.classList.remove('hidden');
@@ -859,101 +1028,99 @@
             scheduleModal.classList.add('hidden');
         });
 
-        scheduleAdminList.addEventListener('click', (event) => {
-            if (event.target.classList.contains('edit-schedule-btn')) {
-                currentScheduleEntryId = event.target.dataset.id;
-                const entry = schedule.find(item => item.id === currentScheduleEntryId);
+        // Слушатели для списков
+        document.addEventListener('click', async (e) => {
+            if (e.target.closest('.edit-btn') && e.target.closest('#facultiesList')) {
+                const id = e.target.closest('.edit-btn').dataset.id;
+                const faculty = faculties.find(f => f.id === id);
+                if (faculty) {
+                    currentFacultyId = id;
+                    document.getElementById('facultyFormTitle').textContent = 'Редактировать факультет';
+                    facultyNameInput.value = faculty.name;
+                    facultyGroupsSection.classList.remove('hidden');
+                    renderFacultyGroups(id);
+                    showPage('faculty_edit_page');
+                }
+            } else if (e.target.closest('.delete-btn') && e.target.closest('#facultiesList')) {
+                const id = e.target.closest('.delete-btn').dataset.id;
+                await deleteFaculty(id);
+            } else if (e.target.closest('.edit-btn') && e.target.closest('#groupsList')) {
+                const id = e.target.closest('.edit-btn').dataset.id;
+                const group = groups.find(g => g.id === id);
+                if (group) {
+                    currentGroupId = id;
+                    document.getElementById('groupFormTitle').textContent = 'Редактировать группу';
+                    groupNameInput.value = group.name;
+                    groupFacultySelect.value = group.facultyId || '';
+                    showPage('group_edit_page');
+                }
+            } else if (e.target.closest('.delete-btn') && e.target.closest('#groupsList')) {
+                const id = e.target.closest('.delete-btn').dataset.id;
+                await deleteGroup(id);
+            } else if (e.target.closest('.add-group-btn')) {
+                const groupId = e.target.closest('.add-group-btn').dataset.groupId;
+                try {
+                    const groupRef = doc(db, `artifacts/${appId}/public/data/groups`, groupId);
+                    await updateDoc(groupRef, { facultyId: currentFacultyId });
+                    showMessage('Группа успешно добавлена к факультету!', 'success');
+                    renderFacultyGroups(currentFacultyId);
+                    addGroupsModal.classList.add('hidden');
+                } catch (error) {
+                    console.error("Ошибка добавления группы к факультету:", error);
+                    showMessage('Не удалось добавить группу.', 'error');
+                }
+            } else if (e.target.closest('.remove-group-btn')) {
+                const groupId = e.target.closest('.remove-group-btn').dataset.groupId;
+                try {
+                    const groupRef = doc(db, `artifacts/${appId}/public/data/groups`, groupId);
+                    await updateDoc(groupRef, { facultyId: null });
+                    showMessage('Группа успешно отвязана от факультета.', 'success');
+                    renderFacultyGroups(currentFacultyId);
+                } catch (error) {
+                    console.error("Ошибка удаления группы:", error);
+                    showMessage('Не удалось отвязать группу.', 'error');
+                }
+            } else if (e.target.closest('.edit-schedule-btn')) {
+                const id = e.target.closest('.edit-schedule-btn').dataset.id;
+                const entry = schedule.find(s => s.id === id);
                 if (entry) {
-                    scheduleModalTitle.textContent = 'Изменить занятие';
+                    currentScheduleEntryId = id;
+                    scheduleModalTitle.textContent = 'Редактировать занятие';
                     scheduleDayInput.value = entry.day;
                     scheduleTimeInput.value = entry.time;
                     scheduleSubjectInput.value = entry.subject;
                     scheduleWeekTypeInput.value = entry.weekType;
                     scheduleModal.classList.remove('hidden');
                 }
-            } else if (event.target.classList.contains('delete-schedule-btn')) {
-                const entryId = event.target.dataset.id;
-                db.collection("schedule").doc(entryId).delete()
-                    .then(() => showMessage("Запись расписания удалена", "success"))
-                    .catch(error => showMessage("Ошибка при удалении: " + error, "error"));
+            } else if (e.target.closest('.delete-schedule-btn')) {
+                const id = e.target.closest('.delete-schedule-btn').dataset.id;
+                await deleteScheduleEntry(id);
             }
         });
 
-        saveScheduleEntryButton.addEventListener('click', () => {
-            const selectedGroup = groups.find(g => g.id === currentGroupId);
-            if (!selectedGroup) {
-                showMessage("Выберите группу", "error");
-                return;
-            }
-
-            const scheduleEntry = {
-                day: scheduleDayInput.value,
-                time: scheduleTimeInput.value,
-                subject: scheduleSubjectInput.value,
-                weekType: scheduleWeekTypeInput.value,
-                group: selectedGroup.name
-            };
-
-            if (currentScheduleEntryId) {
-                db.collection("schedule").doc(currentScheduleEntryId).update(scheduleEntry)
-                    .then(() => {
-                        showMessage("Расписание обновлено", "success");
-                        scheduleModal.classList.add('hidden');
-                    })
-                    .catch(error => showMessage("Ошибка при обновлении: " + error, "error"));
-            } else {
-                db.collection("schedule").add(scheduleEntry)
-                    .then(() => {
-                        showMessage("Занятие добавлено", "success");
-                        scheduleModal.classList.add('hidden');
-                    })
-                    .catch(error => showMessage("Ошибка при добавлении: " + error, "error"));
-            }
-        });
-
-        // User filters
+        saveFacultyButton.addEventListener('click', saveFaculty);
+        saveGroupButton.addEventListener('click', saveGroup);
+        saveScheduleEntryButton.addEventListener('click', saveScheduleEntry);
+        
+        // Обработчики для фильтров
         facultyFilter.addEventListener('change', () => {
-            const selectedFacultyId = facultyFilter.value;
-            groupFilter.innerHTML = '<option value="all">Все группы</option>';
-            const groupsToDisplay = selectedFacultyId === 'all' ? groups : groups.filter(g => g.facultyId === selectedFacultyId);
-            groupsToDisplay.forEach(g => {
-                const option = document.createElement('option');
-                option.value = g.id;
-                option.textContent = g.name;
-                groupFilter.appendChild(option);
-            });
+            renderFacultyAndGroupFilters();
             renderSchedule();
         });
-
         groupFilter.addEventListener('change', renderSchedule);
         dayFilter.addEventListener('change', renderSchedule);
         weekTypeFilter.addEventListener('change', renderSchedule);
         
-        // Initial data fetch and render
-        db.collection("faculties").onSnapshot((snapshot) => {
-            faculties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderFacultyAndGroupFilters();
-            renderFaculties();
-            renderGroupFacultySelect();
-        });
+        // Обработчик для выбора группы в админ-панели расписания
+        groupSelect.addEventListener('change', renderScheduleAdminList);
 
-        db.collection("groups").onSnapshot((snapshot) => {
-            groups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderGroups();
-            renderFacultyGroups(currentFacultyId);
-            renderAvailableGroups();
-            renderGroupSelect();
-            renderFacultyAndGroupFilters();
-            renderSchedule();
-        });
-
-        db.collection("schedule").onSnapshot((snapshot) => {
-            schedule = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderSchedule();
-            renderScheduleAdminList();
+        // Вход в админ-панель (пока без пароля)
+        submitPasswordButton.addEventListener('click', () => {
+             // В реальном приложении здесь должна быть проверка пароля.
+             // Для этой демонстрации мы пропускаем этот шаг.
+             showPage('admin_page');
         });
 
     </script>
-
 </body>
 </html>
