@@ -264,15 +264,15 @@
 
     <script type="module">
         // Глобальные переменные, предоставляемые средой Canvas
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = {
-          apiKey: "AIzaSyB2kuT1fSPp4kBKeEad_rYXMqh27z2KDO0",
-          authDomain: "raspisanie-c90b6.firebaseapp.com",
-          projectId: "raspisanie-c90b6",
-          storageBucket: "raspisanie-c90b6.firebasestorage.app",
-          messagingSenderId: "867699750609",
-          appId: "1:867699750609:web:6cbf1c0c8bfa429b0337f0"
+            apiKey: "AIzaSyB2kuT1fSPp4kBKeEad_rYXMqh27z2KDO0",
+            authDomain: "raspisanie-c90b6.firebaseapp.com",
+            projectId: "raspisanie-c90b6",
+            storageBucket: "raspisanie-c90b6.firebasestorage.app",
+            messagingSenderId: "867699750609",
+            appId: "1:867699750609:web:6cbf1c0c8bfa429b0337f0"
         };
+        const appId = firebaseConfig.appId.split(':')[1];
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
         // --- FIREBASE ИМПОРТЫ ---
