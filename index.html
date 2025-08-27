@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Расписание</title>
+    <title>Управление Факультетами и Группами</title>
+    <!-- Telegram Web App script is essential for mini-apps -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -18,6 +19,7 @@
         .page.active {
             display: block;
         }
+        /* Style for the week type badge */
         .week-badge {
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
@@ -37,23 +39,14 @@
             background-color: #a5f3fc; /* cyan-300 */
             color: #0891b2; /* cyan-700 */
         }
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #4f46e5;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4 flex flex-col items-center">
 
+    <!-- Main Container -->
     <div class="bg-white p-6 md:p-10 rounded-3xl shadow-2xl w-full max-w-2xl">
         
+        <!-- Header with Title and Buttons -->
         <div class="flex justify-between items-center mb-6 border-b pb-4">
             <button id="backButton" class="text-gray-500 hover:text-gray-700 transition-colors duration-200 p-2 rounded-full hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,17 +62,23 @@
             </button>
         </div>
 
+        <!-- Pages Container -->
         <div id="pagesContainer">
             
+            <!-- Schedule Page (Now the default page) -->
             <div id="schedule_page" class="page active">
                 <div class="mb-4 space-y-4">
                     <div class="space-y-2">
                         <label for="facultyFilter" class="block text-sm font-medium text-gray-700">Факультет:</label>
-                        <select id="facultyFilter" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"></select>
+                        <select id="facultyFilter" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
+                            <!-- Options populated by JS -->
+                        </select>
                     </div>
                     <div class="space-y-2">
                         <label for="groupFilter" class="block text-sm font-medium text-gray-700">Группа:</label>
-                        <select id="groupFilter" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"></select>
+                        <select id="groupFilter" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
+                            <!-- Options populated by JS -->
+                        </select>
                     </div>
                     <div class="space-y-2">
                         <label for="dayFilter" class="block text-sm font-medium text-gray-700">День:</label>
@@ -98,12 +97,11 @@
                     </div>
                 </div>
                 <div id="scheduleList" class="space-y-6">
-                    <div class="flex items-center justify-center p-8">
-                        <div class="spinner"></div>
-                    </div>
+                    <!-- Schedule items will be rendered here -->
                 </div>
             </div>
 
+            <!-- Admin Password Page -->
             <div id="password_page" class="page">
                 <div class="space-y-4">
                     <p class="text-gray-600 mb-6">Введите пароль для доступа к панели администратора.</p>
@@ -114,6 +112,7 @@
                 </div>
             </div>
 
+            <!-- Admin Home Page -->
             <div id="admin_page" class="page">
                 <p class="text-gray-600 mb-6">Панель администрирования. Здесь вы можете управлять данными.</p>
                 <div class="space-y-4">
@@ -126,9 +125,14 @@
                     <button id="showScheduleAdminButton" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-indigo-700 transition-colors duration-200 shadow-md">
                         Управление расписанием
                     </button>
+                    <!-- NEW: Button to show the code -->
+                    <button id="showCodeButton" class="w-full bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-gray-700 transition-colors duration-200 shadow-md">
+                        Показать код
+                    </button>
                 </div>
             </div>
 
+            <!-- Schedule Admin Page -->
             <div id="schedule_admin_page" class="page">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-800">Редактирование расписания</h2>
@@ -140,13 +144,16 @@
                 </div>
                 <div class="space-y-2 mb-4">
                     <label for="groupSelect" class="block text-sm font-medium text-gray-700">Выберите группу:</label>
-                    <select id="groupSelect" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"></select>
+                    <select id="groupSelect" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
+                        <!-- Options populated by JS -->
+                    </select>
                 </div>
                 <div id="scheduleAdminList" class="space-y-6">
-                    <p class="text-gray-500 text-center text-sm">Пожалуйста, выберите группу.</p>
+                    <!-- Schedule items will be rendered here -->
                 </div>
             </div>
 
+            <!-- Faculties List Page -->
             <div id="faculties_page" class="page">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-800">Список факультетов</h2>
@@ -157,10 +164,11 @@
                     </button>
                 </div>
                 <div id="facultiesList" class="space-y-4">
-                    <p class="text-gray-500 text-center text-sm">Нет доступных факультетов.</p>
+                    <!-- Faculty items will be rendered here -->
                 </div>
             </div>
 
+            <!-- Groups List Page -->
             <div id="groups_page" class="page">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-800">Список групп</h2>
@@ -171,10 +179,11 @@
                     </button>
                 </div>
                 <div id="groupsList" class="space-y-4">
-                    <p class="text-gray-500 text-center text-sm">Нет доступных групп.</p>
+                    <!-- Group items will be rendered here -->
                 </div>
             </div>
 
+            <!-- Faculty Edit/Create Page -->
             <div id="faculty_edit_page" class="page">
                 <h2 id="facultyFormTitle" class="text-2xl font-semibold text-gray-800 mb-4"></h2>
                 <input id="facultyNameInput" type="text" placeholder="Название факультета" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 mb-4">
@@ -191,27 +200,30 @@
                             </svg>
                         </button>
                     </div>
-                    <div id="facultyGroupsList" class="space-y-2"></div>
+                    <div id="facultyGroupsList" class="space-y-2">
+                        <!-- Groups in this faculty will be rendered here -->
+                    </div>
                 </div>
             </div>
 
+            <!-- Group Edit/Create Page -->
             <div id="group_edit_page" class="page">
                 <h2 id="groupFormTitle" class="text-2xl font-semibold text-gray-800 mb-4"></h2>
-                <select id="groupFacultySelect" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
-                    <option value="">Выберите факультет</option>
-                </select>
                 <input id="groupNameInput" type="text" placeholder="Название группы" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 mb-4">
                 <button id="saveGroupButton" class="w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-blue-700 transition-colors duration-200 shadow-md">
                     Сохранить
                 </button>
             </div>
             
+            <!-- Modal for adding groups to faculty -->
             <div id="addGroupsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
                 <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
                     <div class="mt-3 text-center">
                         <h3 class="text-lg leading-6 font-medium text-gray-900">Добавить группы</h3>
                         <div class="mt-2 px-7 py-3">
-                            <div id="availableGroupsList" class="space-y-2"></div>
+                            <div id="availableGroupsList" class="space-y-2">
+                                <!-- Available groups will be rendered here -->
+                            </div>
                         </div>
                         <div class="items-center px-4 py-3">
                             <button id="closeModalButton" class="px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-xl hover:bg-gray-300 transition-colors duration-200 w-full">
@@ -222,6 +234,7 @@
                 </div>
             </div>
 
+            <!-- Modal for adding/editing schedule entry -->
             <div id="scheduleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
                 <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
                     <div class="mt-3 text-center">
@@ -258,36 +271,53 @@
 
         </div>
 
+        <!-- Status Message Box -->
         <div id="messageBox" class="mt-8 p-4 rounded-xl text-center font-medium transition-opacity duration-300 opacity-0"></div>
 
     </div>
 
-    <script type="module">
-        // Глобальные переменные, предоставляемые средой Canvas
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    <script>
+        // --- DATA AND STATE MANAGEMENT ---
+        const ADMIN_PASSWORD = 'admin'; // Хардкодный пароль для демонстрации
+        
+        // Массивы данных, которые будут имитировать хранилище
+        let faculties = [
+            { id: 1, name: 'Факультет ветеринарной медицины' },
+            { id: 2, name: 'Факультет водных биоресурсов и аквакультуры' }
+        ];
+        let groups = [
+            { id: 101, name: 'Группа-1', facultyId: 1 },
+            { id: 102, name: 'Группа-2', facultyId: 1 },
+            { id: 103, name: 'Группа-1', facultyId: 2 },
+            { id: 104, name: 'Группа-2', facultyId: null }
+        ];
 
-        // --- FIREBASE ИМПОРТЫ ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Пример данных расписания с добавлением типа недели
+        let schedule = [
+            { id: 1, day: 'Понедельник', time: '09:00', subject: 'Математика', group: 'Группа-1', weekType: 'all' },
+            { id: 2, day: 'Понедельник', time: '11:00', subject: 'Физика', group: 'Группа-2', weekType: 'all' },
+            { id: 3, day: 'Вторник', time: '10:00', subject: 'Экономическая теория', group: 'Группа-1', weekType: 'even' },
+            { id: 4, day: 'Среда', time: '13:00', subject: 'Основы программирования', group: 'Группа-1', weekType: 'all' },
+            { id: 5, day: 'Среда', time: '15:00', subject: 'История', group: 'Группа-2', weekType: 'odd' },
+            { id: 6, day: 'Четверг', time: '09:00', subject: 'Линейная алгебра', group: 'Группа-1', weekType: 'even' },
+            { id: 7, day: 'Четверг', time: '11:00', subject: 'Базы данных', group: 'Группа-1', weekType: 'odd' },
+            { id: 8, day: 'Пятница', time: '14:00', subject: 'Проектный менеджмент', group: 'Группа-2', weekType: 'all' },
+            { id: 9, day: 'Вторник', time: '10:00', subject: 'Высшая математика', group: 'Группа-1', weekType: 'odd' },
+            { id: 10, day: 'Вторник', time: '13:00', subject: 'История искусств', group: 'Группа-1', weekType: 'even' }
+        ];
 
-        // --- ДАННЫЕ И СОСТОЯНИЕ ---
-        let faculties = [];
-        let groups = [];
-        let schedule = [];
-        let db;
-        let auth;
-        let userId;
+        let currentFacultyId = null;
+        let currentGroupId = null;
+        let currentScheduleEntryId = null;
 
-        // --- СОСТОЯНИЕ НАВИГАЦИИ ---
+        // --- NAVIGATION STATE ---
         const pageHistory = ['schedule_page'];
         const pageTitle = document.getElementById('pageTitle');
         
-        // --- DOM ЭЛЕМЕНТЫ ---
+        // --- DOM ELEMENTS ---
         const pages = document.querySelectorAll('.page');
         const showAdminButton = document.getElementById('showAdminButton');
+        const showScheduleAdminButton = document.getElementById('showScheduleAdminButton');
         const backButton = document.getElementById('backButton');
         const facultiesList = document.getElementById('facultiesList');
         const groupsList = document.getElementById('groupsList');
@@ -298,7 +328,6 @@
         const weekTypeFilter = document.getElementById('weekTypeFilter');
         const facultyNameInput = document.getElementById('facultyNameInput');
         const groupNameInput = document.getElementById('groupNameInput');
-        const groupFacultySelect = document.getElementById('groupFacultySelect');
         const facultyGroupsSection = document.getElementById('facultyGroupsSection');
         const facultyGroupsList = document.getElementById('facultyGroupsList');
         const addGroupsModal = document.getElementById('addGroupsModal');
@@ -306,19 +335,7 @@
         const adminPasswordInput = document.getElementById('adminPasswordInput');
         const messageBox = document.getElementById('messageBox');
         
-        // Элементы админ-панели
-        const showFacultiesButton = document.getElementById('showFacultiesButton');
-        const showGroupsButton = document.getElementById('showGroupsButton');
-        const showScheduleAdminButton = document.getElementById('showScheduleAdminButton');
-        const addFacultyButton = document.getElementById('addFacultyButton');
-        const addGroupButton = document.getElementById('addGroupButton');
-        const addGroupsToFacultyButton = document.getElementById('addGroupsToFacultyButton');
-        const saveFacultyButton = document.getElementById('saveFacultyButton');
-        const saveGroupButton = document.getElementById('saveGroupButton');
-        const closeModalButton = document.getElementById('closeModalButton');
-        const submitPasswordButton = document.getElementById('submitPasswordButton');
-
-        // Элементы админ-панели расписания
+        // Элементы управления расписанием
         const groupSelect = document.getElementById('groupSelect');
         const scheduleAdminList = document.getElementById('scheduleAdminList');
         const addScheduleEntryButton = document.getElementById('addScheduleEntryButton');
@@ -330,131 +347,60 @@
         const scheduleWeekTypeInput = document.getElementById('scheduleWeekTypeInput');
         const saveScheduleEntryButton = document.getElementById('saveScheduleEntryButton');
         const closeScheduleModalButton = document.getElementById('closeScheduleModalButton');
+        
+        // NEW: Element for the "Show Code" button
+        const showCodeButton = document.getElementById('showCodeButton');
 
-        // Текущее состояние для редактирования
-        let currentFacultyId = null;
-        let currentGroupId = null;
-        let currentScheduleEntryId = null;
 
-        // --- ИНТЕГРАЦИЯ С TELEGRAM WEB APP ---
+        // --- TELEGRAM WEB APP INTEGRATION ---
         const WebApp = window.Telegram.WebApp;
-        WebApp.ready();
+
+        WebApp.ready(); // Сообщить Telegram, что приложение готово к использованию.
         WebApp.onEvent('backButtonClicked', goBack);
 
-        // --- ФУНКЦИИ ИНИЦИАЛИЗАЦИИ ---
-
-        /**
-         * Инициализирует Firebase и настраивает слушателей данных.
-         */
-        async function initializeAppAndAuth() {
-            try {
-                if (!firebaseConfig) {
-                    console.error("Ошибка: Firebase-конфигурация отсутствует.");
-                    showMessage("Ошибка инициализации приложения.", "error");
-                    return;
-                }
-
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // Проверяем, предоставлен ли пользовательский токен
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // Используем onAuthStateChanged для отслеживания состояния аутентификации
-                // Это гарантирует, что мы получим пользователя, прежде чем начнем работать с Firestore.
-                // onAuthStateChanged вызывается один раз при загрузке, а затем при каждом изменении состояния.
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        // После успешного входа начинаем прослушивать данные
-                        setupFirestoreListeners();
-                    } else {
-                        console.log("Пользователь не аутентифицирован.");
-                    }
-                });
-
-            } catch (error) {
-                console.error("Ошибка инициализации Firebase:", error);
-                showMessage("Ошибка инициализации приложения.", "error");
-            }
-        }
-
-        /**
-         * Настраивает слушателей для коллекций Firestore.
-         */
-        function setupFirestoreListeners() {
-            const facultyCollectionRef = collection(db, `artifacts/${appId}/public/data/faculties`);
-            const groupCollectionRef = collection(db, `artifacts/${appId}/public/data/groups`);
-            const scheduleCollectionRef = collection(db, `artifacts/${appId}/public/data/schedule`);
-
-            onSnapshot(facultyCollectionRef, (snapshot) => {
-                faculties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderFaculties();
-                renderGroupFacultySelect();
-                renderFacultyAndGroupFilters();
-            });
-
-            onSnapshot(groupCollectionRef, (snapshot) => {
-                groups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderGroups();
-                renderAvailableGroups();
-                renderGroupSelect();
-                renderFacultyAndGroupFilters();
-            });
-
-            onSnapshot(scheduleCollectionRef, (snapshot) => {
-                schedule = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderSchedule();
-                renderScheduleAdminList();
-            });
-        }
-
-        // --- ФУНКЦИИ НАВИГАЦИИ ---
-
-        /**
-         * Отображает указанную страницу и управляет историей навигации.
-         * @param {string} pageId Идентификатор страницы для отображения.
-         */
+        // --- CORE FUNCTIONS ---
         function showPage(pageId) {
             pages.forEach(page => page.classList.remove('active'));
-            const targetPage = document.getElementById(pageId);
-            if (targetPage) {
-                targetPage.classList.add('active');
-            }
+            document.getElementById(pageId).classList.add('active');
             
             if (pageHistory[pageHistory.length - 1] !== pageId) {
                 pageHistory.push(pageId);
             }
             
             updateNavigationUI();
+            
+            if (pageId === 'faculties_page') {
+                renderFaculties();
+            } else if (pageId === 'groups_page') {
+                renderGroups();
+            } else if (pageId === 'schedule_page') {
+                renderSchedule();
+            } else if (pageId === 'schedule_admin_page') {
+                renderGroupSelect();
+                renderScheduleAdminList();
+            }
         }
 
-        /**
-         * Возвращается к предыдущей странице в истории.
-         */
         function goBack() {
             if (pageHistory.length > 1) {
                 pageHistory.pop();
                 const lastPageId = pageHistory[pageHistory.length - 1];
                 pages.forEach(page => page.classList.remove('active'));
-                const targetPage = document.getElementById(lastPageId);
-                if (targetPage) {
-                    targetPage.classList.add('active');
-                }
+                document.getElementById(lastPageId).classList.add('active');
                 updateNavigationUI();
+                
+                if (lastPageId === 'faculties_page') {
+                    renderFaculties();
+                } else if (lastPageId === 'groups_page') {
+                    renderGroups();
+                } else if (lastPageId === 'schedule_page') {
+                    renderSchedule();
+                }
             } else {
                 WebApp.close();
             }
         }
 
-        /**
-         * Обновляет элементы управления навигацией (кнопка "Назад" и заголовок страницы).
-         */
         function updateNavigationUI() {
             if (pageHistory.length > 1) {
                 WebApp.BackButton.show();
@@ -468,30 +414,44 @@
 
             const currentPage = pageHistory[pageHistory.length - 1];
             switch (currentPage) {
-                case 'schedule_page': pageTitle.textContent = 'Расписание'; break;
-                case 'password_page': pageTitle.textContent = 'Вход'; break;
-                case 'admin_page': pageTitle.textContent = 'Администрирование'; break;
-                case 'faculties_page': pageTitle.textContent = 'Факультеты'; renderFaculties(); break;
-                case 'groups_page': pageTitle.textContent = 'Группы'; renderGroups(); break;
-                case 'schedule_admin_page': pageTitle.textContent = 'Редактирование расписания'; renderGroupSelect(); renderScheduleAdminList(); break;
-                case 'faculty_edit_page': pageTitle.textContent = 'Редактирование факультета'; break;
-                case 'group_edit_page': pageTitle.textContent = 'Редактирование группы'; break;
-                default: pageTitle.textContent = 'Страница';
+                case 'schedule_page':
+                    pageTitle.textContent = 'Расписание';
+                    break;
+                case 'password_page':
+                    pageTitle.textContent = 'Вход';
+                    break;
+                case 'admin_page':
+                    pageTitle.textContent = 'Администрирование';
+                    break;
+                case 'faculties_page':
+                    pageTitle.textContent = 'Факультеты';
+                    break;
+                case 'groups_page':
+                    pageTitle.textContent = 'Группы';
+                    break;
+                case 'schedule_admin_page':
+                    pageTitle.textContent = 'Редактирование расписания';
+                    break;
+                case 'faculty_edit_page':
+                    pageTitle.textContent = 'Редактирование факультета';
+                    break;
+                case 'group_edit_page':
+                    pageTitle.textContent = 'Редактирование группы';
+                    break;
+                default:
+                    pageTitle.textContent = 'Страница';
             }
         }
         
-        /**
-         * Отображает временное сообщение в нижней части экрана.
-         * @param {string} message Текст сообщения.
-         * @param {string} type Тип сообщения ('success' или 'error').
-         */
         function showMessage(message, type) {
             messageBox.textContent = message;
-            messageBox.classList.remove('opacity-0', 'bg-red-200', 'text-red-800', 'bg-green-200', 'text-green-800');
+            messageBox.classList.remove('opacity-0', 'bg-red-200', 'text-red-800', 'bg-green-200', 'text-green-800', 'bg-blue-200', 'text-blue-800');
             if (type === 'success') {
                 messageBox.classList.add('bg-green-200', 'text-green-800');
             } else if (type === 'error') {
                 messageBox.classList.add('bg-red-200', 'text-red-800');
+            } else {
+                messageBox.classList.add('bg-blue-200', 'text-blue-800');
             }
             messageBox.classList.add('opacity-100');
             setTimeout(() => {
@@ -500,17 +460,10 @@
             }, 3000);
         }
 
-        // --- РЕНДЕРИНГ ЭЛЕМЕНТОВ ---
+        // --- RENDERING FUNCTIONS ---
 
-        /**
-         * Рендерит список факультетов.
-         */
         function renderFaculties() {
             facultiesList.innerHTML = '';
-            if (faculties.length === 0) {
-                facultiesList.innerHTML = `<p class="text-gray-500 text-center text-sm">Нет доступных факультетов.</p>`;
-                return;
-            }
             faculties.forEach(faculty => {
                 const facultyGroupsCount = groups.filter(g => g.facultyId === faculty.id).length;
                 const item = document.createElement('div');
@@ -529,15 +482,8 @@
             });
         }
 
-        /**
-         * Рендерит список групп.
-         */
         function renderGroups() {
             groupsList.innerHTML = '';
-            if (groups.length === 0) {
-                groupsList.innerHTML = `<p class="text-gray-500 text-center text-sm">Нет доступных групп.</p>`;
-                return;
-            }
             groups.forEach(group => {
                 const faculty = faculties.find(f => f.id === group.facultyId);
                 const facultyName = faculty ? faculty.name : 'Без факультета';
@@ -557,48 +503,233 @@
             });
         }
 
-        /**
-         * Рендерит выпадающий список факультетов для редактирования группы.
-         */
-        function renderGroupFacultySelect() {
-            groupFacultySelect.innerHTML = '<option value="">Выберите факультет</option>';
-            faculties.forEach(faculty => {
-                const option = document.createElement('option');
-                option.value = faculty.id;
-                option.textContent = faculty.name;
-                groupFacultySelect.appendChild(option);
-            });
-        }
-
-        /**
-         * Рендерит список групп, привязанных к факультету.
-         */
-        function renderFacultyGroups() {
+        function renderFacultyGroups(facultyId) {
             facultyGroupsList.innerHTML = '';
-            if (!currentFacultyId) return;
-
-            const facultyGroups = groups.filter(g => g.facultyId === currentFacultyId);
+            const facultyGroups = groups.filter(g => g.facultyId === facultyId);
             if (facultyGroups.length === 0) {
-                facultyGroupsList.innerHTML = `<p class="text-gray-500 text-center text-sm">Нет групп, привязанных к этому факультету.</p>`;
-                return;
+                facultyGroupsList.innerHTML = `<p class="text-gray-500 text-sm">В этом факультете пока нет групп.</p>`;
             }
-
             facultyGroups.forEach(group => {
                 const item = document.createElement('div');
-                item.className = 'flex items-center justify-between bg-gray-50 p-4 rounded-xl shadow-sm';
+                item.className = 'flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200';
                 item.innerHTML = `
-                    <h3 class="font-semibold text-gray-900">${group.name}</h3>
-                    <button class="remove-group-btn text-red-500 hover:text-red-700 font-medium transition-colors duration-200" data-id="${group.id}">Отвязать</button>
+                    <span class="text-gray-800">${group.name}</span>
+                    <button class="remove-group-btn text-red-500 hover:text-red-700 text-sm font-medium transition-colors duration-200" data-group-id="${group.id}">Убрать</button>
                 `;
                 facultyGroupsList.appendChild(item);
             });
         }
+
+        function renderAvailableGroups() {
+            availableGroupsList.innerHTML = '';
+            const availableGroups = groups.filter(g => g.facultyId === null);
+            if (availableGroups.length === 0) {
+                availableGroupsList.innerHTML = `<p class="text-gray-500 text-sm">Все группы уже привязаны к факультетам.</p>`;
+            }
+            availableGroups.forEach(group => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200';
+                item.innerHTML = `
+                    <span class="text-gray-800">${group.name}</span>
+                    <button class="add-group-btn bg-green-500 text-white text-sm font-medium py-1 px-3 rounded-lg hover:bg-green-600 transition-colors duration-200" data-group-id="${group.id}">Добавить</button>
+                `;
+                availableGroupsList.appendChild(item);
+            });
+        }
+
+        function renderSchedule() {
+            scheduleList.innerHTML = '';
+            const selectedFacultyId = facultyFilter.value === 'all' ? null : parseInt(facultyFilter.value);
+            const selectedGroupId = groupFilter.value === 'all' ? null : parseInt(groupFilter.value);
+            const dayFilterValue = dayFilter.value;
+            const weekTypeFilterValue = weekTypeFilter.value;
+            const daysOfWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+            
+            // Check if both faculty and group are selected
+            if (!selectedFacultyId || !selectedGroupId) {
+                scheduleList.innerHTML = `<p class="text-gray-500 text-center text-sm">Пожалуйста, выберите факультет и группу для просмотра расписания.</p>`;
+                return;
+            }
+
+            const selectedGroup = groups.find(g => g.id === selectedGroupId);
+            let filteredSchedule = [];
+
+            if (selectedGroup) {
+                filteredSchedule = schedule.filter(item => item.group === selectedGroup.name);
+            }
+
+            // Apply day filter
+            if (dayFilterValue === 'today') {
+                const today = new Date().getDay(); // 0 for Sunday, 1 for Monday, etc.
+                const todayName = daysOfWeek[today];
+                filteredSchedule = filteredSchedule.filter(item => item.day === todayName);
+            }
+
+            // Apply week type filter
+            if (weekTypeFilterValue !== 'all') {
+                filteredSchedule = filteredSchedule.filter(item => item.weekType === weekTypeFilterValue || item.weekType === 'all');
+            }
+
+            // Sort by day of week and then by time
+            filteredSchedule.sort((a, b) => {
+                const dayA = daysOfWeek.indexOf(a.day);
+                const dayB = daysOfWeek.indexOf(b.day);
+                if (dayA !== dayB) {
+                    return dayA - dayB;
+                }
+                // Sort by time
+                return a.time.localeCompare(b.time);
+            });
+
+            if (filteredSchedule.length === 0) {
+                scheduleList.innerHTML = `<p class="text-gray-500 text-center text-sm">Занятий не найдено.</p>`;
+                return;
+            }
+            
+            const renderedDays = new Set();
+            
+            filteredSchedule.forEach(item => {
+                if (!renderedDays.has(item.day)) {
+                    const dayHeader = document.createElement('h3');
+                    dayHeader.className = 'text-xl font-semibold text-gray-800 border-b-2 border-gray-200 pb-2 mb-2 mt-4';
+                    dayHeader.textContent = item.day;
+                    scheduleList.appendChild(dayHeader);
+                    renderedDays.add(item.day);
+                }
+
+                const scheduleItem = document.createElement('div');
+                scheduleItem.className = 'bg-gray-50 p-4 rounded-xl shadow-sm flex items-center justify-between';
+                
+                let weekBadgeClass = '';
+                let weekBadgeText = '';
+                if (item.weekType === 'all') {
+                    weekBadgeClass = 'all';
+                    weekBadgeText = 'Любая неделя';
+                } else if (item.weekType === 'odd') {
+                    weekBadgeClass = 'odd';
+                    weekBadgeText = 'Нечетная неделя';
+                } else if (item.weekType === 'even') {
+                    weekBadgeClass = 'even';
+                    weekBadgeText = 'Четная неделя';
+                }
+
+                scheduleItem.innerHTML = `
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <p class="font-bold text-lg text-gray-900">${item.subject}</p>
+                            <span class="week-badge ${weekBadgeClass}">${weekBadgeText}</span>
+                        </div>
+                        <p class="text-sm text-gray-500">${item.time}</p>
+                    </div>
+                `;
+                scheduleList.appendChild(scheduleItem);
+            });
+        }
         
-        /**
-         * Рендерит выпадающий список групп для админ-панели расписания.
-         */
+        function renderScheduleAdminList() {
+            scheduleAdminList.innerHTML = '';
+            const selectedGroupId = groupSelect.value === 'all' ? null : parseInt(groupSelect.value);
+
+            if (!selectedGroupId) {
+                scheduleAdminList.innerHTML = `<p class="text-gray-500 text-center text-sm">Пожалуйста, выберите группу для редактирования расписания.</p>`;
+                return;
+            }
+
+            const selectedGroup = groups.find(g => g.id === selectedGroupId);
+            let filteredSchedule = [];
+            if (selectedGroup) {
+                 filteredSchedule = schedule.filter(item => item.group === selectedGroup.name);
+            }
+            
+            const daysOfWeek = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+            // Sort by day and then by time
+            filteredSchedule.sort((a, b) => {
+                const dayA = daysOfWeek.indexOf(a.day);
+                const dayB = daysOfWeek.indexOf(b.day);
+                if (dayA !== dayB) {
+                    return dayA - dayB;
+                }
+                // Sort by time
+                return a.time.localeCompare(b.time);
+            });
+
+            if (filteredSchedule.length === 0) {
+                scheduleAdminList.innerHTML = `<p class="text-gray-500 text-center text-sm">У этой группы нет занятий. Нажмите +, чтобы добавить.</p>`;
+                return;
+            }
+
+            const renderedDays = new Set();
+            filteredSchedule.forEach(item => {
+                if (!renderedDays.has(item.day)) {
+                    const dayHeader = document.createElement('h3');
+                    dayHeader.className = 'text-xl font-semibold text-gray-800 border-b-2 border-gray-200 pb-2 mb-2 mt-4';
+                    dayHeader.textContent = item.day;
+                    scheduleAdminList.appendChild(dayHeader);
+                    renderedDays.add(item.day);
+                }
+
+                const scheduleItem = document.createElement('div');
+                scheduleItem.className = 'bg-gray-50 p-4 rounded-xl shadow-sm flex items-center justify-between';
+                
+                let weekBadgeClass = '';
+                let weekBadgeText = '';
+                if (item.weekType === 'all') {
+                    weekBadgeClass = 'all';
+                    weekBadgeText = 'Любая неделя';
+                } else if (item.weekType === 'odd') {
+                    weekBadgeClass = 'odd';
+                    weekBadgeText = 'Нечетная неделя';
+                } else if (item.weekType === 'even') {
+                    weekBadgeClass = 'even';
+                    weekBadgeText = 'Четная неделя';
+                }
+
+                scheduleItem.innerHTML = `
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <p class="font-bold text-lg text-gray-900">${item.subject}</p>
+                            <span class="week-badge ${weekBadgeClass}">${weekBadgeText}</span>
+                        </div>
+                        <p class="text-sm text-gray-500">${item.time}</p>
+                    </div>
+                    <div>
+                        <button class="edit-schedule-btn text-blue-500 hover:text-blue-700 font-medium transition-colors duration-200 mr-2" data-id="${item.id}">Редактировать</button>
+                        <button class="delete-schedule-btn text-red-500 hover:text-red-700 font-medium transition-colors duration-200" data-id="${item.id}">Удалить</button>
+                    </div>
+                `;
+                scheduleAdminList.appendChild(scheduleItem);
+            });
+        }
+
+        // Filter functions
+        function renderFacultyFilter() {
+            facultyFilter.innerHTML = '<option value="all">Все факультеты</option>';
+            faculties.forEach(faculty => {
+                const option = document.createElement('option');
+                option.value = faculty.id;
+                option.textContent = faculty.name;
+                facultyFilter.appendChild(option);
+            });
+        }
+
+        function renderGroupFilter() {
+            groupFilter.innerHTML = '<option value="all">Все группы</option>';
+            const selectedFacultyId = facultyFilter.value === 'all' ? null : parseInt(facultyFilter.value);
+            
+            const filteredGroups = selectedFacultyId ? 
+                groups.filter(g => g.facultyId === selectedFacultyId) : 
+                groups;
+
+            filteredGroups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group.id;
+                option.textContent = group.name;
+                groupFilter.appendChild(option);
+            });
+        }
+
         function renderGroupSelect() {
-            groupSelect.innerHTML = '<option value="">Выберите группу</option>';
+            groupSelect.innerHTML = '<option value="all">Выберите группу</option>';
             groups.forEach(group => {
                 const option = document.createElement('option');
                 option.value = group.id;
@@ -606,305 +737,76 @@
                 groupSelect.appendChild(option);
             });
         }
+
+        // --- EVENT HANDLERS ---
+        showAdminButton.addEventListener('click', () => {
+            adminPasswordInput.value = ''; // Clear the input field
+            showMessage('Для входа введите пароль.', 'info');
+            showPage('password_page');
+        });
         
-        /**
-         * Рендерит список доступных групп для модального окна добавления.
-         */
-        function renderAvailableGroups() {
-            availableGroupsList.innerHTML = '';
-            const unassignedGroups = groups.filter(g => !g.facultyId || g.facultyId !== currentFacultyId);
-            if (unassignedGroups.length === 0) {
-                availableGroupsList.innerHTML = `<p class="text-gray-500 text-center text-sm">Все группы уже привязаны.</p>`;
-                return;
-            }
-            unassignedGroups.forEach(group => {
-                const item = document.createElement('div');
-                item.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-xl shadow-sm';
-                item.innerHTML = `
-                    <h3 class="font-semibold text-gray-900">${group.name}</h3>
-                    <button class="add-group-btn text-green-500 hover:text-green-700 font-medium transition-colors duration-200" data-id="${group.id}">Добавить</button>
-                `;
-                availableGroupsList.appendChild(item);
-            });
-        }
-
-        /**
-         * Рендерит список занятий в админ-панели расписания.
-         */
-        function renderScheduleAdminList() {
-            const selectedGroupId = groupSelect.value;
-            scheduleAdminList.innerHTML = '';
-            if (!selectedGroupId) {
-                scheduleAdminList.innerHTML = `<p class="text-gray-500 text-center text-sm">Пожалуйста, выберите группу.</p>`;
-                return;
-            }
-
-            const groupSchedule = schedule.filter(s => s.groupId === selectedGroupId);
-            if (groupSchedule.length === 0) {
-                scheduleAdminList.innerHTML = `<p class="text-gray-500 text-center text-sm">Для этой группы нет занятий.</p>`;
-                return;
-            }
-            
-            // Сортируем по дню и времени
-            const daysOrder = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
-            const sortedSchedule = groupSchedule.sort((a, b) => {
-                const dayA = daysOrder.indexOf(a.day);
-                const dayB = daysOrder.indexOf(b.day);
-                if (dayA !== dayB) {
-                    return dayA - dayB;
-                }
-                return a.time.localeCompare(b.time);
-            });
-
-            sortedSchedule.forEach(entry => {
-                const item = document.createElement('div');
-                item.className = 'flex items-center justify-between bg-gray-50 p-4 rounded-xl shadow-sm';
-                item.innerHTML = `
-                    <div>
-                        <h3 class="font-semibold text-gray-900">${entry.subject}</h3>
-                        <p class="text-sm text-gray-500">${entry.day} ${entry.time} <span class="week-badge ${entry.weekType}">${entry.weekType === 'odd' ? 'Нечетная' : entry.weekType === 'even' ? 'Четная' : 'Все'}</span></p>
-                    </div>
-                    <div>
-                        <button class="edit-btn text-blue-500 hover:text-blue-700 font-medium transition-colors duration-200 mr-2" data-id="${entry.id}">Редактировать</button>
-                        <button class="delete-btn text-red-500 hover:text-red-700 font-medium transition-colors duration-200" data-id="${entry.id}">Удалить</button>
-                    </div>
-                `;
-                scheduleAdminList.appendChild(item);
-            });
-        }
-
-        /**
-         * Рендерит расписание для пользователя на основе фильтров.
-         */
-        function renderSchedule() {
-            scheduleList.innerHTML = '';
-            
-            const selectedFacultyId = facultyFilter.value;
-            const selectedGroupId = groupFilter.value;
-            const selectedDay = dayFilter.value;
-            const selectedWeekType = weekTypeFilter.value;
-            const today = new Date().toLocaleDateString('ru-RU', { weekday: 'long' });
-
-            if (!selectedGroupId) {
-                scheduleList.innerHTML = `<p class="text-gray-500 text-center text-sm">Пожалуйста, выберите группу.</p>`;
-                return;
-            }
-            
-            const filteredSchedule = schedule.filter(entry => {
-                const isGroupMatch = entry.groupId === selectedGroupId;
-                const isDayMatch = selectedDay === 'all' || entry.day === today;
-                const isWeekTypeMatch = selectedWeekType === 'all' || entry.weekType === 'all' || entry.weekType === selectedWeekType;
-                return isGroupMatch && isDayMatch && isWeekTypeMatch;
-            });
-
-            if (filteredSchedule.length === 0) {
-                scheduleList.innerHTML = `<p class="text-gray-500 text-center text-sm">Расписание не найдено.</p>`;
-                return;
-            }
-            
-            const sortedSchedule = filteredSchedule.sort((a, b) => a.time.localeCompare(b.time));
-
-            sortedSchedule.forEach(entry => {
-                const item = document.createElement('div');
-                item.className = 'bg-white p-4 rounded-xl shadow-sm flex justify-between items-center';
-                item.innerHTML = `
-                    <div>
-                        <h3 class="font-semibold text-gray-900">${entry.subject}</h3>
-                        <p class="text-sm text-gray-500 mt-1">${entry.time} <span class="week-badge ${entry.weekType}">${entry.weekType === 'odd' ? 'Нечетная' : entry.weekType === 'even' ? 'Четная' : 'Все'}</span></p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm text-gray-600">${entry.day}</p>
-                    </div>
-                `;
-                scheduleList.appendChild(item);
-            });
-        }
-        
-        /**
-         * Рендерит выпадающие списки факультетов и групп для фильтрации.
-         */
-        function renderFacultyAndGroupFilters() {
-            // Очищаем и заполняем факультеты
-            facultyFilter.innerHTML = '<option value="">Выберите факультет</option>';
-            faculties.forEach(f => {
-                const option = document.createElement('option');
-                option.value = f.id;
-                option.textContent = f.name;
-                facultyFilter.appendChild(option);
-            });
-
-            // Очищаем и заполняем группы
-            const selectedFacultyId = facultyFilter.value;
-            const groupsToDisplay = selectedFacultyId
-                ? groups.filter(g => g.facultyId === selectedFacultyId)
-                : groups;
-
-            groupFilter.innerHTML = '<option value="">Выберите группу</option>';
-            groupsToDisplay.forEach(g => {
-                const option = document.createElement('option');
-                option.value = g.id;
-                option.textContent = g.name;
-                groupFilter.appendChild(option);
-            });
-        }
-
-        // --- ОБРАБОТЧИКИ СОБЫТИЙ ---
-
-        // Переключение на админ-панель
-        showAdminButton.addEventListener('click', () => showPage('password_page'));
-        backButton.addEventListener('click', goBack);
-
-        // Вход в админ-панель
-        submitPasswordButton.addEventListener('click', () => {
+        document.getElementById('submitPasswordButton').addEventListener('click', () => {
             const password = adminPasswordInput.value;
-            // Здесь должна быть логика проверки пароля
-            // Для примера просто используем статический пароль
-            if (password === 'admin123') {
+            if (password === ADMIN_PASSWORD) {
+                showMessage('Успешный вход!', 'success');
                 showPage('admin_page');
-                adminPasswordInput.value = '';
-                showMessage("Вход выполнен успешно!", "success");
             } else {
-                showMessage("Неверный пароль!", "error");
+                showMessage('Неверный пароль.', 'error');
             }
         });
 
-        // Навигация по админ-панели
-        showFacultiesButton.addEventListener('click', () => showPage('faculties_page'));
-        showGroupsButton.addEventListener('click', () => showPage('groups_page'));
-        showScheduleAdminButton.addEventListener('click', () => showPage('schedule_admin_page'));
+        backButton.addEventListener('click', goBack);
+        document.getElementById('showFacultiesButton').addEventListener('click', () => showPage('faculties_page'));
+        document.getElementById('showGroupsButton').addEventListener('click', () => showPage('groups_page'));
+        document.getElementById('showScheduleAdminButton').addEventListener('click', () => showPage('schedule_admin_page'));
 
-        // Добавление факультета
-        addFacultyButton.addEventListener('click', () => {
-            currentFacultyId = null;
-            document.getElementById('facultyFormTitle').textContent = 'Новый факультет';
-            facultyNameInput.value = '';
-            facultyGroupsSection.classList.add('hidden');
-            showPage('faculty_edit_page');
-        });
+        // NEW: Event listener for the "Show Code" button
+        showCodeButton.addEventListener('click', () => {
+            // Retrieve the full HTML source code of the current page
+            const sourceCode = document.documentElement.outerHTML;
 
-        // Добавление группы
-        addGroupButton.addEventListener('click', () => {
-            currentGroupId = null;
-            document.getElementById('groupFormTitle').textContent = 'Новая группа';
-            groupNameInput.value = '';
-            groupFacultySelect.value = '';
-            showPage('group_edit_page');
-        });
+            // Prepare the data to be sent back to the bot
+            const data = {
+                action: 'get_source_code',
+                code: sourceCode,
+            };
 
-        // Редактирование/удаление факультета
-        facultiesList.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('edit-btn')) {
-                currentFacultyId = e.target.dataset.id;
-                const facultyToEdit = faculties.find(f => f.id === currentFacultyId);
-                if (facultyToEdit) {
-                    document.getElementById('facultyFormTitle').textContent = 'Редактирование факультета';
-                    facultyNameInput.value = facultyToEdit.name;
-                    facultyGroupsSection.classList.remove('hidden');
-                    renderFacultyGroups();
-                    showPage('faculty_edit_page');
-                }
-            } else if (e.target.classList.contains('delete-btn')) {
-                if (confirm('Вы уверены, что хотите удалить этот факультет?')) {
-                    await deleteFaculty(e.target.dataset.id);
-                }
-            }
-        });
-
-        // Редактирование/удаление группы
-        groupsList.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('edit-btn')) {
-                currentGroupId = e.target.dataset.id;
-                const groupToEdit = groups.find(g => g.id === currentGroupId);
-                if (groupToEdit) {
-                    document.getElementById('groupFormTitle').textContent = 'Редактирование группы';
-                    groupNameInput.value = groupToEdit.name;
-                    groupFacultySelect.value = groupToEdit.facultyId || '';
-                    showPage('group_edit_page');
-                }
-            } else if (e.target.classList.contains('delete-btn')) {
-                if (confirm('Вы уверены, что хотите удалить эту группу?')) {
-                    await deleteGroup(e.target.dataset.id);
-                }
-            }
-        });
-
-        // Сохранение факультета
-        saveFacultyButton.addEventListener('click', async () => {
-            const name = facultyNameInput.value.trim();
-            if (name) {
-                if (currentFacultyId) {
-                    await updateFaculty(currentFacultyId, name);
-                } else {
-                    await addFaculty(name);
-                }
-                goBack();
-            } else {
-                showMessage('Название факультета не может быть пустым.', 'error');
-            }
-        });
-
-        // Сохранение группы
-        saveGroupButton.addEventListener('click', async () => {
-            const name = groupNameInput.value.trim();
-            const facultyId = groupFacultySelect.value;
-            if (name) {
-                if (currentGroupId) {
-                    await updateGroup(currentGroupId, name, facultyId);
-                } else {
-                    await addGroup(name, facultyId);
-                }
-                goBack();
-            } else {
-                showMessage('Название группы не может быть пустым.', 'error');
+            // Use WebApp.sendData() to send the JSON string back to the bot
+            try {
+                WebApp.sendData(JSON.stringify(data));
+                showMessage('Код успешно отправлен в бот.', 'success');
+            } catch (e) {
+                console.error("Failed to send data:", e);
+                showMessage('Не удалось отправить код.', 'error');
             }
         });
         
-        // Открытие модального окна добавления групп к факультету
-        addGroupsToFacultyButton.addEventListener('click', () => {
-            renderAvailableGroups();
-            addGroupsModal.classList.remove('hidden');
+        // Schedule filter events
+        facultyFilter.addEventListener('change', () => {
+            renderGroupFilter();
+            renderSchedule();
+        });
+        groupFilter.addEventListener('change', () => {
+            renderSchedule();
+        });
+        dayFilter.addEventListener('change', () => {
+            renderSchedule();
+        });
+        weekTypeFilter.addEventListener('change', () => {
+            renderSchedule();
         });
 
-        // Закрытие модального окна
-        closeModalButton.addEventListener('click', () => {
-            addGroupsModal.classList.add('hidden');
-        });
-        
-        // Добавление/отвязка групп из модального окна
-        addGroupsModal.addEventListener('click', async (e) => {
-            const groupId = e.target.dataset.id;
-            if (!groupId) return;
-
-            if (e.target.classList.contains('add-group-btn')) {
-                await updateGroup(groupId, groups.find(g => g.id === groupId).name, currentFacultyId);
-                renderAvailableGroups();
-                renderFacultyGroups();
-            }
-        });
-
-        // Отвязка групп от факультета
-        facultyGroupsList.addEventListener('click', async (e) => {
-            const groupId = e.target.dataset.id;
-            if (!groupId) return;
-
-            if (e.target.classList.contains('remove-group-btn')) {
-                await updateGroup(groupId, groups.find(g => g.id === groupId).name, null);
-                renderFacultyGroups();
-            }
-        });
-
-        // Выбор группы в админ-панели расписания
+        // Schedule Admin events
         groupSelect.addEventListener('change', () => {
             renderScheduleAdminList();
         });
 
-        // Добавление занятия
         addScheduleEntryButton.addEventListener('click', () => {
-            const selectedGroupId = groupSelect.value;
-            if (!selectedGroupId) {
-                showMessage('Пожалуйста, выберите группу.', 'error');
+            if (groupSelect.value === 'all') {
+                showMessage('Пожалуйста, сначала выберите группу.', 'error');
                 return;
             }
+            // Reset modal for new entry
             currentScheduleEntryId = null;
             scheduleModalTitle.textContent = 'Добавить занятие';
             scheduleDayInput.value = 'Понедельник';
@@ -913,87 +815,230 @@
             scheduleWeekTypeInput.value = 'all';
             scheduleModal.classList.remove('hidden');
         });
+        
+        saveScheduleEntryButton.addEventListener('click', () => {
+            const groupId = parseInt(groupSelect.value);
+            const selectedGroup = groups.find(g => g.id === groupId);
+            const day = scheduleDayInput.value;
+            const time = scheduleTimeInput.value;
+            const subject = scheduleSubjectInput.value.trim();
+            const weekType = scheduleWeekTypeInput.value;
 
-        // Закрытие модального окна расписания
-        closeScheduleModalButton.addEventListener('click', () => {
-            scheduleModal.classList.add('hidden');
-        });
-
-        // Сохранение занятия
-        saveScheduleEntryButton.addEventListener('click', async () => {
-            const selectedGroupId = groupSelect.value;
-            if (!selectedGroupId) {
-                showMessage('Ошибка: группа не выбрана.', 'error');
+            if (!time || !subject) {
+                showMessage('Пожалуйста, заполните все поля.', 'error');
                 return;
             }
 
-            const newEntry = {
-                groupId: selectedGroupId,
-                day: scheduleDayInput.value,
-                time: scheduleTimeInput.value,
-                subject: scheduleSubjectInput.value.trim(),
-                weekType: scheduleWeekTypeInput.value,
-            };
-
-            if (newEntry.subject && newEntry.time) {
-                if (currentScheduleEntryId) {
-                    await updateScheduleEntry(currentScheduleEntryId, newEntry);
-                } else {
-                    await addScheduleEntry(newEntry);
+            if (currentScheduleEntryId) {
+                const entry = schedule.find(e => e.id === currentScheduleEntryId);
+                if (entry) {
+                    entry.day = day;
+                    entry.time = time;
+                    entry.subject = subject;
+                    entry.weekType = weekType;
+                    showMessage('Занятие успешно обновлено!', 'success');
                 }
-                scheduleModal.classList.add('hidden');
-                renderScheduleAdminList();
             } else {
-                showMessage('Пожалуйста, заполните все поля.', 'error');
+                const newId = schedule.length > 0 ? Math.max(...schedule.map(e => e.id)) + 1 : 1;
+                schedule.push({ id: newId, day: day, time: time, subject: subject, group: selectedGroup.name, weekType: weekType });
+                showMessage('Занятие успешно добавлено!', 'success');
             }
+
+            scheduleModal.classList.add('hidden');
+            renderScheduleAdminList();
+            renderSchedule(); // Update the main schedule view
         });
 
-        // Редактирование/удаление занятия
-        scheduleAdminList.addEventListener('click', async (e) => {
-            const entryId = e.target.dataset.id;
-            if (!entryId) return;
+        closeScheduleModalButton.addEventListener('click', () => {
+            scheduleModal.classList.add('hidden');
+        });
+        
+        scheduleAdminList.addEventListener('click', (e) => {
+            const btn = e.target;
+            const id = parseInt(btn.dataset.id);
 
-            if (e.target.classList.contains('edit-btn')) {
-                currentScheduleEntryId = entryId;
-                const entryToEdit = schedule.find(s => s.id === entryId);
-                if (entryToEdit) {
+            if (btn.classList.contains('edit-schedule-btn')) {
+                currentScheduleEntryId = id;
+                const entry = schedule.find(e => e.id === id);
+                if (entry) {
                     scheduleModalTitle.textContent = 'Редактировать занятие';
-                    scheduleDayInput.value = entryToEdit.day;
-                    scheduleTimeInput.value = entryToEdit.time;
-                    scheduleSubjectInput.value = entryToEdit.subject;
-                    scheduleWeekTypeInput.value = entryToEdit.weekType;
+                    scheduleDayInput.value = entry.day;
+                    scheduleTimeInput.value = entry.time;
+                    scheduleSubjectInput.value = entry.subject;
+                    scheduleWeekTypeInput.value = entry.weekType;
                     scheduleModal.classList.remove('hidden');
                 }
-            } else if (e.target.classList.contains('delete-btn')) {
-                if (confirm('Вы уверены, что хотите удалить это занятие?')) {
-                    await deleteScheduleEntry(entryId);
+            } else if (btn.classList.contains('delete-schedule-btn')) {
+                // Using WebApp.showConfirm as a non-blocking alternative to window.confirm()
+                WebApp.showConfirm('Вы уверены, что хотите удалить это занятие?', (isConfirmed) => {
+                    if (isConfirmed) {
+                        schedule = schedule.filter(e => e.id !== id);
+                        showMessage('Занятие удалено.', 'success');
+                        renderScheduleAdminList();
+                        renderSchedule(); // Update the main schedule view
+                    }
+                });
+            }
+        });
+
+        // Faculty actions
+        document.getElementById('addFacultyButton').addEventListener('click', () => {
+            currentFacultyId = null;
+            document.getElementById('facultyFormTitle').textContent = 'Создание нового факультета';
+            facultyNameInput.value = '';
+            facultyGroupsSection.classList.add('hidden');
+            showPage('faculty_edit_page');
+        });
+        document.getElementById('saveFacultyButton').addEventListener('click', () => {
+            const name = facultyNameInput.value.trim();
+            if (name) {
+                if (currentFacultyId) {
+                    const faculty = faculties.find(f => f.id === currentFacultyId);
+                    if (faculty) {
+                        faculty.name = name;
+                        showMessage('Факультет успешно обновлен!', 'success');
+                    }
+                } else {
+                    const newId = faculties.length > 0 ? Math.max(...faculties.map(f => f.id)) + 1 : 1;
+                    faculties.push({ id: newId, name: name });
+                    showMessage('Факультет успешно создан!', 'success');
+                }
+                renderFacultyFilter();
+                showPage('faculties_page');
+            } else {
+                showMessage('Пожалуйста, введите название.', 'error');
+            }
+        });
+        facultiesList.addEventListener('click', (e) => {
+            const btn = e.target;
+            const id = parseInt(btn.dataset.id);
+            if (btn.classList.contains('edit-btn')) {
+                currentFacultyId = id;
+                const faculty = faculties.find(f => f.id === id);
+                document.getElementById('facultyFormTitle').textContent = 'Редактирование факультета';
+                facultyNameInput.value = faculty.name;
+                facultyGroupsSection.classList.remove('hidden');
+                renderFacultyGroups(id);
+                showPage('faculty_edit_page');
+            } else if (btn.classList.contains('delete-btn')) {
+                WebApp.showConfirm('Вы уверены, что хотите удалить этот факультет?', (isConfirmed) => {
+                    if (isConfirmed) {
+                        groups.forEach(group => {
+                            if (group.facultyId === id) {
+                                group.facultyId = null;
+                            }
+                        });
+                        faculties = faculties.filter(f => f.id !== id);
+                        renderFaculties();
+                        renderFacultyFilter();
+                        renderGroupFilter();
+                        renderSchedule();
+                        showMessage('Факультет успешно удален.', 'success');
+                    }
+                });
+            }
+        });
+        
+        // Group actions
+        document.getElementById('addGroupButton').addEventListener('click', () => {
+            currentGroupId = null;
+            document.getElementById('groupFormTitle').textContent = 'Создание новой группы';
+            groupNameInput.value = '';
+            showPage('group_edit_page');
+        });
+        document.getElementById('saveGroupButton').addEventListener('click', () => {
+            const name = groupNameInput.value.trim();
+            if (name) {
+                if (currentGroupId) {
+                    const group = groups.find(g => g.id === currentGroupId);
+                    if (group) {
+                        group.name = name;
+                        showMessage('Группа успешно обновлена!', 'success');
+                    }
+                } else {
+                    const newId = groups.length > 0 ? Math.max(...groups.map(g => g.id)) + 1 : 101;
+                    groups.push({ id: newId, name: name, facultyId: null });
+                    showMessage('Группа успешно создана!', 'success');
+                }
+                renderGroupFilter();
+                renderSchedule();
+                showPage('groups_page');
+            } else {
+                showMessage('Пожалуйста, введите название.', 'error');
+            }
+        });
+        groupsList.addEventListener('click', (e) => {
+            const btn = e.target;
+            const id = parseInt(btn.dataset.id);
+            if (btn.classList.contains('edit-btn')) {
+                currentGroupId = id;
+                const group = groups.find(g => g.id === id);
+                document.getElementById('groupFormTitle').textContent = 'Редактирование группы';
+                groupNameInput.value = group.name;
+                showPage('group_edit_page');
+            } else if (btn.classList.contains('delete-btn')) {
+                WebApp.showConfirm('Вы уверены, что хотите удалить эту группу?', (isConfirmed) => {
+                    if (isConfirmed) {
+                        groups = groups.filter(g => g.id !== id);
+                        renderGroups();
+                        renderGroupFilter();
+                        renderSchedule();
+                        showMessage('Группа успешно удалена.', 'success');
+                    }
+                });
+            }
+        });
+
+        // Add/Remove Groups from Faculty
+        document.getElementById('addGroupsToFacultyButton').addEventListener('click', () => {
+            renderAvailableGroups();
+            addGroupsModal.classList.remove('hidden');
+        });
+
+        document.getElementById('closeModalButton').addEventListener('click', () => {
+            addGroupsModal.classList.add('hidden');
+        });
+        
+        availableGroupsList.addEventListener('click', (e) => {
+            const btn = e.target;
+            if (btn.classList.contains('add-group-btn')) {
+                const groupId = parseInt(btn.dataset.groupId);
+                const group = groups.find(g => g.id === groupId);
+                if (group) {
+                    group.facultyId = currentFacultyId;
+                    showMessage(`Группа "${group.name}" добавлена в факультет.`, 'success');
+                    renderFacultyGroups(currentFacultyId);
+                    addGroupsModal.classList.add('hidden');
+                    renderFacultyFilter();
+                    renderGroupFilter();
+                    renderSchedule();
                 }
             }
         });
 
-        // Фильтрация расписания для пользователя
-        facultyFilter.addEventListener('change', () => {
-            const selectedFacultyId = facultyFilter.value;
-            const groupsToDisplay = selectedFacultyId
-                ? groups.filter(g => g.facultyId === selectedFacultyId)
-                : groups;
-
-            groupFilter.innerHTML = '<option value="">Выберите группу</option>';
-            groupsToDisplay.forEach(g => {
-                const option = document.createElement('option');
-                option.value = g.id;
-                option.textContent = g.name;
-                groupFilter.appendChild(option);
-            });
-            renderSchedule();
+        facultyGroupsList.addEventListener('click', (e) => {
+            const btn = e.target;
+            if (btn.classList.contains('remove-group-btn')) {
+                const groupId = parseInt(btn.dataset.groupId);
+                const group = groups.find(g => g.id === groupId);
+                if (group) {
+                    group.facultyId = null;
+                    showMessage(`Группа "${group.name}" удалена из факультета.`, 'success');
+                    renderFacultyGroups(currentFacultyId);
+                    renderFacultyFilter();
+                    renderGroupFilter();
+                    renderSchedule();
+                }
+            }
         });
 
-        groupFilter.addEventListener('change', renderSchedule);
-        dayFilter.addEventListener('change', renderSchedule);
-        weekTypeFilter.addEventListener('change', renderSchedule);
-        
-        // Запуск приложения
-        initializeAppAndAuth();
+        // Initial rendering on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFacultyFilter();
+            renderGroupFilter();
+            renderSchedule();
+            updateNavigationUI();
+        });
         
     </script>
 </body>
