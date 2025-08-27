@@ -53,6 +53,12 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
+            <!-- NEW: Added button to go to Admin Home -->
+            <button id="homeButton" class="text-gray-500 hover:text-gray-700 transition-colors duration-200 p-2 rounded-full hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l2 2m-2-2v10a1 1 0 01-1 1h-3m-6-10v10a1 1 0 001 1h3m-8-2v4h4v-4m-4 0v4m4-4h4" />
+                </svg>
+            </button>
             <h1 id="pageTitle" class="text-3xl font-bold text-gray-900">Расписание</h1>
             <button id="showAdminButton" class="text-gray-500 hover:text-gray-700 transition-colors duration-200 p-2 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -125,14 +131,14 @@
                     <button id="showScheduleAdminButton" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-indigo-700 transition-colors duration-200 shadow-md">
                         Управление расписанием
                     </button>
-                    <!-- NEW: Button to show the code -->
+                    <!-- Button to show the code -->
                     <button id="showCodeButton" class="w-full bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-gray-700 transition-colors duration-200 shadow-md">
-                        Посмотреть код
+                        Посмотреть код расписания
                     </button>
                 </div>
             </div>
 
-            <!-- NEW: Page to display the source code -->
+            <!-- NEW: Page to display the source code as JSON -->
             <div id="code_viewer_page" class="page">
                 <div class="p-4 bg-gray-900 rounded-xl overflow-x-auto">
                     <pre id="codeDisplay" class="text-white text-sm leading-snug whitespace-pre-wrap font-mono"></pre>
@@ -326,6 +332,7 @@
         const showAdminButton = document.getElementById('showAdminButton');
         const showScheduleAdminButton = document.getElementById('showScheduleAdminButton');
         const backButton = document.getElementById('backButton');
+        const homeButton = document.getElementById('homeButton'); // NEW
         const facultiesList = document.getElementById('facultiesList');
         const groupsList = document.getElementById('groupsList');
         const scheduleList = document.getElementById('scheduleList');
@@ -355,7 +362,7 @@
         const saveScheduleEntryButton = document.getElementById('saveScheduleEntryButton');
         const closeScheduleModalButton = document.getElementById('closeScheduleModalButton');
         
-        // NEW: Element for the "Show Code" button and code display
+        // Element for the "Show Code" button and code display
         const showCodeButton = document.getElementById('showCodeButton');
         const codeDisplay = document.getElementById('codeDisplay');
 
@@ -388,6 +395,8 @@
             } else if (pageId === 'schedule_admin_page') {
                 renderGroupSelect();
                 renderScheduleAdminList();
+            } else if (pageId === 'admin_page') {
+                pageHistory.splice(1); // Clear history after admin page
             }
         }
 
@@ -406,6 +415,8 @@
                     renderGroups();
                 } else if (lastPageId === 'schedule_page') {
                     renderSchedule();
+                } else if (lastPageId === 'admin_page') {
+                    // This case is handled by `homeButton` now, but keeping for completeness
                 }
             } else {
                 WebApp.close();
@@ -413,17 +424,36 @@
         }
 
         function updateNavigationUI() {
+            const currentPage = pageHistory[pageHistory.length - 1];
+            
+            // Show/hide Back button based on history length
             if (pageHistory.length > 1) {
                 WebApp.BackButton.show();
-                showAdminButton.classList.add('hidden');
                 backButton.classList.remove('hidden');
             } else {
                 WebApp.BackButton.hide();
-                showAdminButton.classList.remove('hidden');
                 backButton.classList.add('hidden');
             }
 
-            const currentPage = pageHistory[pageHistory.length - 1];
+            // Show/hide Home button for admin sections
+            if (currentPage.includes('_page') && currentPage !== 'admin_page') {
+                 if (isUserAdmin()) { // Check if user is authenticated as admin
+                    homeButton.classList.remove('hidden');
+                 } else {
+                    homeButton.classList.add('hidden');
+                 }
+            } else {
+                homeButton.classList.add('hidden');
+            }
+
+            // Show/hide Admin button on main page
+            if (currentPage === 'schedule_page') {
+                showAdminButton.classList.remove('hidden');
+            } else {
+                showAdminButton.classList.add('hidden');
+            }
+
+            // Set page title
             switch (currentPage) {
                 case 'schedule_page':
                     pageTitle.textContent = 'Расписание';
@@ -457,6 +487,12 @@
             }
         }
         
+        // A simple check to see if the user has successfully logged in as admin
+        function isUserAdmin() {
+            return document.getElementById('admin_page').classList.contains('active') ||
+                   pageHistory.includes('admin_page');
+        }
+
         function showMessage(message, type) {
             messageBox.textContent = message;
             messageBox.classList.remove('opacity-0', 'bg-red-200', 'text-red-800', 'bg-green-200', 'text-green-800', 'bg-blue-200', 'text-blue-800');
@@ -770,14 +806,15 @@
         });
 
         backButton.addEventListener('click', goBack);
+        homeButton.addEventListener('click', () => showPage('admin_page')); // NEW
         document.getElementById('showFacultiesButton').addEventListener('click', () => showPage('faculties_page'));
         document.getElementById('showGroupsButton').addEventListener('click', () => showPage('groups_page'));
         document.getElementById('showScheduleAdminButton').addEventListener('click', () => showPage('schedule_admin_page'));
 
-        // NEW: Event listener for the "Show Code" button to display the code in the app
+        // NEW: Event listener for the "Show Code" button to display the code as JSON
         showCodeButton.addEventListener('click', () => {
-            const sourceCode = document.documentElement.outerHTML;
-            codeDisplay.textContent = sourceCode;
+            const scheduleJson = JSON.stringify(schedule, null, 2);
+            codeDisplay.textContent = scheduleJson;
             showPage('code_viewer_page');
         });
         
