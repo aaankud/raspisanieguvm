@@ -127,8 +127,15 @@
                     </button>
                     <!-- NEW: Button to show the code -->
                     <button id="showCodeButton" class="w-full bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-gray-700 transition-colors duration-200 shadow-md">
-                        Показать код
+                        Посмотреть код
                     </button>
+                </div>
+            </div>
+
+            <!-- NEW: Page to display the source code -->
+            <div id="code_viewer_page" class="page">
+                <div class="p-4 bg-gray-900 rounded-xl overflow-x-auto">
+                    <pre id="codeDisplay" class="text-white text-sm leading-snug whitespace-pre-wrap font-mono"></pre>
                 </div>
             </div>
 
@@ -348,8 +355,9 @@
         const saveScheduleEntryButton = document.getElementById('saveScheduleEntryButton');
         const closeScheduleModalButton = document.getElementById('closeScheduleModalButton');
         
-        // NEW: Element for the "Show Code" button
+        // NEW: Element for the "Show Code" button and code display
         const showCodeButton = document.getElementById('showCodeButton');
+        const codeDisplay = document.getElementById('codeDisplay');
 
 
         // --- TELEGRAM WEB APP INTEGRATION ---
@@ -363,12 +371,14 @@
             pages.forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             
+            // Manage history to enable back navigation
             if (pageHistory[pageHistory.length - 1] !== pageId) {
                 pageHistory.push(pageId);
             }
             
             updateNavigationUI();
             
+            // Render specific content for each page
             if (pageId === 'faculties_page') {
                 renderFaculties();
             } else if (pageId === 'groups_page') {
@@ -389,6 +399,7 @@
                 document.getElementById(lastPageId).classList.add('active');
                 updateNavigationUI();
                 
+                // Re-render content when going back
                 if (lastPageId === 'faculties_page') {
                     renderFaculties();
                 } else if (lastPageId === 'groups_page') {
@@ -437,6 +448,9 @@
                     break;
                 case 'group_edit_page':
                     pageTitle.textContent = 'Редактирование группы';
+                    break;
+                case 'code_viewer_page':
+                    pageTitle.textContent = 'Исходный код';
                     break;
                 default:
                     pageTitle.textContent = 'Страница';
@@ -760,25 +774,11 @@
         document.getElementById('showGroupsButton').addEventListener('click', () => showPage('groups_page'));
         document.getElementById('showScheduleAdminButton').addEventListener('click', () => showPage('schedule_admin_page'));
 
-        // NEW: Event listener for the "Show Code" button
+        // NEW: Event listener for the "Show Code" button to display the code in the app
         showCodeButton.addEventListener('click', () => {
-            // Retrieve the full HTML source code of the current page
             const sourceCode = document.documentElement.outerHTML;
-
-            // Prepare the data to be sent back to the bot
-            const data = {
-                action: 'get_source_code',
-                code: sourceCode,
-            };
-
-            // Use WebApp.sendData() to send the JSON string back to the bot
-            try {
-                WebApp.sendData(JSON.stringify(data));
-                showMessage('Код успешно отправлен в бот.', 'success');
-            } catch (e) {
-                console.error("Failed to send data:", e);
-                showMessage('Не удалось отправить код.', 'error');
-            }
+            codeDisplay.textContent = sourceCode;
+            showPage('code_viewer_page');
         });
         
         // Schedule filter events
