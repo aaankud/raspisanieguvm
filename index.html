@@ -264,6 +264,8 @@
                             </select>
                             <input id="scheduleTimeInput" type="time" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
                             <input id="scheduleSubjectInput" type="text" placeholder="Название предмета" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                            <input id="scheduleBuildingInput" type="text" placeholder="Корпус" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
+                            <input id="scheduleRoomInput" type="text" placeholder="Кабинет" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500">
                             <select id="scheduleWeekTypeInput" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500">
                                 <option value="all">Для всех недель</option>
                                 <option value="even">Четная неделя</option>
@@ -305,18 +307,18 @@
             { id: 104, name: 'Группа-2', facultyId: null }
         ];
 
-        // Пример данных расписания с добавлением типа недели
+        // Пример данных расписания с добавлением типа недели, корпуса и кабинета
         let schedule = [
-            { id: 1, day: 'Понедельник', time: '09:00', subject: 'Математика', group: 'Группа-1', weekType: 'all' },
-            { id: 2, day: 'Понедельник', time: '11:00', subject: 'Физика', group: 'Группа-2', weekType: 'all' },
-            { id: 3, day: 'Вторник', time: '10:00', subject: 'Экономическая теория', group: 'Группа-1', weekType: 'even' },
-            { id: 4, day: 'Среда', time: '13:00', subject: 'Основы программирования', group: 'Группа-1', weekType: 'all' },
-            { id: 5, day: 'Среда', time: '15:00', subject: 'История', group: 'Группа-2', weekType: 'odd' },
-            { id: 6, day: 'Четверг', time: '09:00', subject: 'Линейная алгебра', group: 'Группа-1', weekType: 'even' },
-            { id: 7, day: 'Четверг', time: '11:00', subject: 'Базы данных', group: 'Группа-1', weekType: 'odd' },
-            { id: 8, day: 'Пятница', time: '14:00', subject: 'Проектный менеджмент', group: 'Группа-2', weekType: 'all' },
-            { id: 9, day: 'Вторник', time: '10:00', subject: 'Высшая математика', group: 'Группа-1', weekType: 'odd' },
-            { id: 10, day: 'Вторник', time: '13:00', subject: 'История искусств', group: 'Группа-1', weekType: 'even' }
+            { id: 1, day: 'Понедельник', time: '09:00', subject: 'Математика', group: 'Группа-1', building: 'Корпус А', room: '101', weekType: 'all' },
+            { id: 2, day: 'Понедельник', time: '11:00', subject: 'Физика', group: 'Группа-2', building: 'Корпус B', room: '205', weekType: 'all' },
+            { id: 3, day: 'Вторник', time: '10:00', subject: 'Экономическая теория', group: 'Группа-1', building: 'Корпус C', room: '315', weekType: 'even' },
+            { id: 4, day: 'Среда', time: '13:00', subject: 'Основы программирования', group: 'Группа-1', building: 'Корпус A', room: '108', weekType: 'all' },
+            { id: 5, day: 'Среда', time: '15:00', subject: 'История', group: 'Группа-2', building: 'Корпус B', room: '202', weekType: 'odd' },
+            { id: 6, day: 'Четверг', time: '09:00', subject: 'Линейная алгебра', group: 'Группа-1', building: 'Корпус C', room: '301', weekType: 'even' },
+            { id: 7, day: 'Четверг', time: '11:00', subject: 'Базы данных', group: 'Группа-1', building: 'Корпус B', room: '210', weekType: 'odd' },
+            { id: 8, day: 'Пятница', time: '14:00', subject: 'Проектный менеджмент', group: 'Группа-2', building: 'Корпус A', room: '105', weekType: 'all' },
+            { id: 9, day: 'Вторник', time: '10:00', subject: 'Высшая математика', group: 'Группа-1', building: 'Корпус C', room: '305', weekType: 'odd' },
+            { id: 10, day: 'Вторник', time: '13:00', subject: 'История искусств', group: 'Группа-1', building: 'Корпус A', room: '103', weekType: 'even' }
         ];
 
         let currentFacultyId = null;
@@ -332,7 +334,7 @@
         const showAdminButton = document.getElementById('showAdminButton');
         const showScheduleAdminButton = document.getElementById('showScheduleAdminButton');
         const backButton = document.getElementById('backButton');
-        const homeButton = document.getElementById('homeButton'); // NEW
+        const homeButton = document.getElementById('homeButton'); 
         const facultiesList = document.getElementById('facultiesList');
         const groupsList = document.getElementById('groupsList');
         const scheduleList = document.getElementById('scheduleList');
@@ -358,6 +360,8 @@
         const scheduleDayInput = document.getElementById('scheduleDayInput');
         const scheduleTimeInput = document.getElementById('scheduleTimeInput');
         const scheduleSubjectInput = document.getElementById('scheduleSubjectInput');
+        const scheduleBuildingInput = document.getElementById('scheduleBuildingInput');
+        const scheduleRoomInput = document.getElementById('scheduleRoomInput');
         const scheduleWeekTypeInput = document.getElementById('scheduleWeekTypeInput');
         const saveScheduleEntryButton = document.getElementById('saveScheduleEntryButton');
         const closeScheduleModalButton = document.getElementById('closeScheduleModalButton');
@@ -436,7 +440,7 @@
             }
 
             // Show/hide Home button for admin sections
-            if (currentPage.includes('_page') && currentPage !== 'admin_page') {
+            if (currentPage.includes('_page') && currentPage !== 'admin_page' && currentPage !== 'password_page') {
                  if (isUserAdmin()) { // Check if user is authenticated as admin
                     homeButton.classList.remove('hidden');
                  } else {
@@ -662,6 +666,9 @@
                     weekBadgeClass = 'even';
                     weekBadgeText = 'Четная неделя';
                 }
+                
+                // Construct the location string.
+                const location = (item.building && item.room) ? `${item.building}, ${item.room}` : 'Место не указано';
 
                 scheduleItem.innerHTML = `
                     <div>
@@ -669,7 +676,7 @@
                             <p class="font-bold text-lg text-gray-900">${item.subject}</p>
                             <span class="week-badge ${weekBadgeClass}">${weekBadgeText}</span>
                         </div>
-                        <p class="text-sm text-gray-500">${item.time}</p>
+                        <p class="text-sm text-gray-500">${item.time} | ${location}</p>
                     </div>
                 `;
                 scheduleList.appendChild(scheduleItem);
@@ -734,13 +741,16 @@
                     weekBadgeText = 'Четная неделя';
                 }
 
+                // Construct the location string.
+                const location = (item.building && item.room) ? `${item.building}, ${item.room}` : 'Место не указано';
+
                 scheduleItem.innerHTML = `
                     <div>
                         <div class="flex items-center space-x-2 mb-1">
                             <p class="font-bold text-lg text-gray-900">${item.subject}</p>
                             <span class="week-badge ${weekBadgeClass}">${weekBadgeText}</span>
                         </div>
-                        <p class="text-sm text-gray-500">${item.time}</p>
+                        <p class="text-sm text-gray-500">${item.time} | ${location}</p>
                     </div>
                     <div>
                         <button class="edit-schedule-btn text-blue-500 hover:text-blue-700 font-medium transition-colors duration-200 mr-2" data-id="${item.id}">Редактировать</button>
@@ -806,7 +816,7 @@
         });
 
         backButton.addEventListener('click', goBack);
-        homeButton.addEventListener('click', () => showPage('admin_page')); // NEW
+        homeButton.addEventListener('click', () => showPage('admin_page'));
         document.getElementById('showFacultiesButton').addEventListener('click', () => showPage('faculties_page'));
         document.getElementById('showGroupsButton').addEventListener('click', () => showPage('groups_page'));
         document.getElementById('showScheduleAdminButton').addEventListener('click', () => showPage('schedule_admin_page'));
@@ -849,6 +859,8 @@
             scheduleDayInput.value = 'Понедельник';
             scheduleTimeInput.value = '';
             scheduleSubjectInput.value = '';
+            scheduleBuildingInput.value = '';
+            scheduleRoomInput.value = '';
             scheduleWeekTypeInput.value = 'all';
             scheduleModal.classList.remove('hidden');
         });
@@ -859,6 +871,8 @@
             const day = scheduleDayInput.value;
             const time = scheduleTimeInput.value;
             const subject = scheduleSubjectInput.value.trim();
+            const building = scheduleBuildingInput.value.trim();
+            const room = scheduleRoomInput.value.trim();
             const weekType = scheduleWeekTypeInput.value;
 
             if (!time || !subject) {
@@ -872,12 +886,14 @@
                     entry.day = day;
                     entry.time = time;
                     entry.subject = subject;
+                    entry.building = building;
+                    entry.room = room;
                     entry.weekType = weekType;
                     showMessage('Занятие успешно обновлено!', 'success');
                 }
             } else {
                 const newId = schedule.length > 0 ? Math.max(...schedule.map(e => e.id)) + 1 : 1;
-                schedule.push({ id: newId, day: day, time: time, subject: subject, group: selectedGroup.name, weekType: weekType });
+                schedule.push({ id: newId, day: day, time: time, subject: subject, group: selectedGroup.name, building: building, room: room, weekType: weekType });
                 showMessage('Занятие успешно добавлено!', 'success');
             }
 
@@ -902,6 +918,8 @@
                     scheduleDayInput.value = entry.day;
                     scheduleTimeInput.value = entry.time;
                     scheduleSubjectInput.value = entry.subject;
+                    scheduleBuildingInput.value = entry.building || '';
+                    scheduleRoomInput.value = entry.room || '';
                     scheduleWeekTypeInput.value = entry.weekType;
                     scheduleModal.classList.remove('hidden');
                 }
