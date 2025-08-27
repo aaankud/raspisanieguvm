@@ -255,17 +255,23 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script>
         // --- FIREBASE CONFIGURATION ---
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "firebase/app";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyB2kuT1fSPp4kBKeEad_rYXMqh27z2KDO0",
             authDomain: "raspisanie-c90b6.firebaseapp.com",
             projectId: "raspisanie-c90b6",
             storageBucket: "raspisanie-c90b6.firebasestorage.app",
             messagingSenderId: "867699750609",
-            appId: "1:867699750609:web:6cbf1c0c8bfa429b0337f0",
-            measurementId: "G-JDF8DNGFZT"
+            appId: "1:867699750609:web:6cbf1c0c8bfa429b0337f0"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
 
         // --- DATA AND STATE MANAGEMENT ---
         const ADMIN_PASSWORD = 'admin';
