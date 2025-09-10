@@ -214,6 +214,10 @@
         .lesson-details span:not(:last-child)::after {
             content: " • ";
         }
+        
+        .lesson-details span:first-child {
+            font-weight: 500;
+        }
 
         .placeholder {
             text-align: center;
@@ -265,7 +269,8 @@
                 <select id="group-select"></select>
             </div>
             <div class="week-toggle">
-                <button id="upper-week-btn" class="active">Верхняя</button>
+                <button id="all-weeks-btn" class="active">Все недели</button>
+                <button id="upper-week-btn">Верхняя</button>
                 <button id="lower-week-btn">Нижняя</button>
             </div>
         </div>
@@ -309,13 +314,14 @@
         // --- Переменные состояния ---
         let scheduleData = [];
         let currentFaculty, currentCourse, currentGroup;
-        let selectedWeek = 'Верхняя';
+        let selectedWeek = 'Все';
         let currentView = 'today';
 
         // --- Элементы DOM ---
         const facultySelect = document.getElementById('faculty-select');
         const courseSelect = document.getElementById('course-select');
         const groupSelect = document.getElementById('group-select');
+        const allWeeksBtn = document.getElementById('all-weeks-btn');
         const upperWeekBtn = document.getElementById('upper-week-btn');
         const lowerWeekBtn = document.getElementById('lower-week-btn');
         const todayViewBtn = document.getElementById('today-view-btn');
@@ -370,14 +376,6 @@
             } finally {
                 scheduleContainer.classList.remove('loading');
             }
-        }
-        
-        // Определение текущей недели (Верхняя/Нижняя)
-        function getCurrentWeekType() {
-            const startDate = new Date('2024-09-01'); // Условная дата начала семестра
-            const today = new Date();
-            const weekNumber = Math.ceil(((today - startDate) / (1000 * 60 * 60 * 24) + 1) / 7);
-            return weekNumber % 2 === 1 ? 'Верхняя' : 'Нижняя';
         }
 
         // Заполнение селекторов
@@ -468,7 +466,7 @@
                 item.faculty === currentFaculty &&
                 item.course === currentCourse &&
                 item.group === currentGroup &&
-                item.week === selectedWeek
+                (selectedWeek === 'Все' || item.week === selectedWeek)
             );
 
             let html = '';
@@ -488,7 +486,8 @@
             }
 
             if (!html.trim()) {
-                html = `<div class="placeholder">Для выбранных параметров (${selectedWeek} неделя) расписание не найдено.</div>`;
+                const weekText = selectedWeek === 'Все' ? 'на обеих неделях' : `на ${selectedWeek.toLowerCase()} неделе`;
+                html = `<div class="placeholder">Для выбранных параметров ${weekText} расписание не найдено.</div>`;
             }
 
             setTimeout(() => { // Для плавности
@@ -506,20 +505,31 @@
                  return '';
             }
             
-            // Сортируем занятия по времени
-            dayLessons.sort((a, b) => lessonTimes.indexOf(a.time) - lessonTimes.indexOf(b.time));
+            // Сортируем занятия по времени и неделе
+            dayLessons.sort((a, b) => {
+                const timeA = lessonTimes.indexOf(a.time);
+                const timeB = lessonTimes.indexOf(b.time);
+                if (timeA !== timeB) return timeA - timeB;
+                return a.week.localeCompare(b.week); // Сначала Верхняя, потом Нижняя
+            });
+
 
             let dayHtml = `<div class="day-card"><div class="day-header">${dayName}</div>`;
             dayLessons.forEach(lesson => {
+                let detailsHtml = `<span>${lesson.type || ''}</span>
+                                   <span>${lesson.teacher || ''}</span>
+                                   <span>${lesson.location || ''}</span>`;
+                if (selectedWeek === 'Все') {
+                    detailsHtml = `<span>${lesson.week}</span>` + detailsHtml;
+                }
+                
                 dayHtml += `
                     <div class="lesson">
                         <div class="lesson-time">${lesson.time}</div>
                         <div class="lesson-info">
                             <div class="lesson-name">${lesson.subject || 'Нет данных'}</div>
                             <div class="lesson-details">
-                                <span>${lesson.type || ''}</span>
-                                <span>${lesson.teacher || ''}</span>
-                                <span>${lesson.location || ''}</span>
+                                ${detailsHtml}
                             </div>
                         </div>
                     </div>
@@ -538,7 +548,7 @@
                 item.faculty === currentFaculty &&
                 item.course === currentCourse &&
                 item.group === currentGroup &&
-                item.week === selectedWeek
+                (selectedWeek === 'Все' || item.week === selectedWeek)
             );
             
             const daysToRender = currentView === 'today' 
@@ -555,7 +565,8 @@
                     hasLessons = true;
                     textToCopy += `--- ${day.toUpperCase()} ---\n`;
                     dayLessons.forEach(lesson => {
-                        textToCopy += `${lesson.time} - ${lesson.subject} (${lesson.type})\n`;
+                        const weekInfo = (selectedWeek === 'Все' && lesson.week) ? `[${lesson.week}] ` : '';
+                        textToCopy += `${lesson.time} - ${weekInfo}${lesson.subject} (${lesson.type})\n`;
                         textToCopy += `  ${lesson.teacher}, ${lesson.location}\n\n`;
                     });
                 }
@@ -580,24 +591,22 @@
         async function init() {
             populateSelectors();
             loadSelection();
-            
-            // Устанавливаем переключатель недели
-            const currentWeek = getCurrentWeekType();
-            selectedWeek = currentWeek;
-            if (currentWeek === 'Верхняя') {
-                upperWeekBtn.classList.add('active');
-                lowerWeekBtn.classList.remove('active');
-            } else {
-                lowerWeekBtn.classList.add('active');
-                upperWeekBtn.classList.remove('active');
-            }
 
             await fetchAndParseData();
             updateSchedule();
 
             // --- Назначение обработчиков событий ---
+            allWeeksBtn.addEventListener('click', () => {
+                selectedWeek = 'Все';
+                allWeeksBtn.classList.add('active');
+                upperWeekBtn.classList.remove('active');
+                lowerWeekBtn.classList.remove('active');
+                updateSchedule();
+            });
+
             upperWeekBtn.addEventListener('click', () => {
                 selectedWeek = 'Верхняя';
+                allWeeksBtn.classList.remove('active');
                 upperWeekBtn.classList.add('active');
                 lowerWeekBtn.classList.remove('active');
                 updateSchedule();
@@ -605,8 +614,9 @@
 
             lowerWeekBtn.addEventListener('click', () => {
                 selectedWeek = 'Нижняя';
-                lowerWeekBtn.classList.add('active');
+                allWeeksBtn.classList.remove('active');
                 upperWeekBtn.classList.remove('active');
+                lowerWeekBtn.classList.add('active');
                 updateSchedule();
             });
 
@@ -632,3 +642,4 @@
     </script>
 </body>
 </html>
+
