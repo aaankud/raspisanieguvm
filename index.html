@@ -606,7 +606,7 @@
 
             upperWeekBtn.addEventListener('click', () => {
                 selectedWeek = 'Верхняя';
-                allWeeksBtn.classList.remove('active');
+                allWeeksBtn.classList.add('active');
                 upperWeekBtn.classList.add('active');
                 lowerWeekBtn.classList.remove('active');
                 updateSchedule();
@@ -614,7 +614,7 @@
 
             lowerWeekBtn.addEventListener('click', () => {
                 selectedWeek = 'Нижняя';
-                allWeeksBtn.classList.remove('active');
+                allWeeksBtn.classList.add('active');
                 upperWeekBtn.classList.remove('active');
                 lowerWeekBtn.classList.add('active');
                 updateSchedule();
